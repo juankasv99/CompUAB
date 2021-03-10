@@ -1,0 +1,1834 @@
+================================================================================
+INFORME OBLIGATORIO DE CORRECCION DE LA PRACTICA ===============================
+================================================================================
+Alumno.....: (Juan Carlos,Soriano Valle,1493037,0000000@uab.cat)
+Nombre.....: Juan Carlos
+Apellidos..: Soriano Valle
+NIA........: 1493037
+e-mail.....: 0000000@uab.cat
+
+-------------------------------------------------------------------------
+
+Fichero........: c:\tfg\Compiladors2021\Practicas\Analisi Sintactica\1493037\Sintactic.csl
+NIA Entrega....: 1493037
+Fecha..........: 9/3/2021
+Hora...........: 22:38
+Ampliaciones...: 
+    ArrayMultidimensional DeclaracionMultiplesVariablesMismoTipo
+    DeclaracionVariableAuto InstruccionBreak InstruccionCase InstruccionForElse
+    OperadorBoolBits
+
+Ver test de las ampliaciones...: 
+    InstruccionCase
+
+
+################################################################################
+###                  SINTACTICO OBLIGATORIO: TEST QUE FALLAN                 ###
+################################################################################
+
+################################################################################
+###                  SINTACTICO OBLIGATORIO: TEST CORRECTOS                  ###
+################################################################################
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoTestSintacticoLOOSDummy OBLIGATORIO
+DESCRIPCION: Nada
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        Var a:Array [20] of integer;
+/*  4*/    }
+/*  5*/    
+--------------------------------------------------------
+Analitzant SintacticoTestSintacticoLOOSDummy
+TEST SintacticoTestSintacticoLOOSDummy OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoDeclaracionArrays OBLIGATORIO
+DESCRIPCION: Verifica la descripción correcta del tipo de datos Array
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    Type tabla1=array[10] of integer;
+/*  2*/    Type tabla2=array[10] of array[20] of real;
+/*  3*/    IMPRIMIR_TAULA_DE_SIMBOLS;
+/*  4*/    procedure main()
+/*  5*/    {
+/*  6*/    }
+/*  7*/    
+--------------------------------------------------------
+Analitzant SintacticoDeclaracionArrays
+TEST SintacticoDeclaracionArrays OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoDeclaracionApuntadores OBLIGATORIO
+DESCRIPCION: Verifica la descripción correcta del tipo de datos Array
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    Type tabla1=^integer;
+/*  2*/    Type tabla2=^real;
+/*  3*/    IMPRIMIR_TAULA_DE_SIMBOLS;
+/*  4*/    procedure main()
+/*  5*/    {
+/*  6*/    }
+/*  7*/    
+--------------------------------------------------------
+Analitzant SintacticoDeclaracionApuntadores
+TEST SintacticoDeclaracionApuntadores OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoDeclaracionTipoDeDatosRecursivo OBLIGATORIO
+DESCRIPCION: Verifica que se aceptan declaraciones recursivas
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class nodo {
+/*  2*/        siguiente:^nodo;
+/*  3*/        dato:Integer;
+/*  4*/    }
+/*  5*/    IMPRIMIR_TAULA_DE_SIMBOLS;
+/*  6*/    procedure main()
+/*  7*/    {
+/*  8*/    }        
+/*  9*/    
+--------------------------------------------------------
+Analitzant SintacticoDeclaracionTipoDeDatosRecursivo
+TEST SintacticoDeclaracionTipoDeDatosRecursivo OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoDeclaracionVariablesGlobales OBLIGATORIO
+DESCRIPCION: Verifica que las variables globales se declaran correctamente
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    Var a:Integer;
+/*  2*/    var b:Real;
+/*  3*/    procedure main()
+/*  4*/    {
+/*  5*/        a=10;
+/*  6*/        b=20.0;
+/*  7*/        PrintLn "a=",a;
+/*  8*/        PrintLn "b=",b;
+/*  9*/    }
+/* 10*/    IMPRIMIR_TAULA_DE_SIMBOLS;
+/* 11*/    
+--------------------------------------------------------
+Analitzant SintacticoDeclaracionVariablesGlobales
+TEST SintacticoDeclaracionVariablesGlobales OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoDeclaracionVariablesLocales OBLIGATORIO
+DESCRIPCION: Verifica que las variables locales se declaran correctamente
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var a:bool;
+/*  4*/        var b:Character;
+/*  5*/        var c:Integer;
+/*  6*/        var d:Real;
+/*  7*/        IMPRIMIR_TAULA_DE_SIMBOLS;
+/*  8*/        a=true;
+/*  9*/        b='x';
+/* 10*/        c=10;
+/* 11*/        d=20.5;
+/* 12*/        PrintLn "a=",a;
+/* 13*/        PrintLn "b=",b;
+/* 14*/        PrintLn "c=",c;
+/* 15*/        PrintLn "d=",d;
+/* 16*/    }
+/* 17*/    
+--------------------------------------------------------
+Analitzant SintacticoDeclaracionVariablesLocales
+TEST SintacticoDeclaracionVariablesLocales OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones1 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    function factorial(n:integer):integer
+/*  2*/    {
+/*  3*/        if n<=0 then return 1;
+/*  4*/        else return n*factorial(n-1);
+/*  5*/    }
+/*  6*/    procedure main()
+/*  7*/    {
+/*  8*/        PrintLn "Factorial de ",0," es ",factorial(0);
+/*  9*/        PrintLn "Factorial de ",5," es ",factorial(5);
+/* 10*/    }
+/* 11*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones1
+TEST SintacticoPruebaLOOSSinExtensiones1 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones2 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var t:array [10] of integer;
+/*  4*/        t[3]=10;
+/*  5*/        PrintLn "t[3]=",t[3];
+/*  6*/    }
+/*  7*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones2
+TEST SintacticoPruebaLOOSSinExtensiones2 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones3 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class point {
+/*  2*/        m_X:Real;
+/*  3*/        m_Y:Real;
+/*  4*/        procedure imprimir();
+/*  5*/    }
+/*  6*/    
+/*  7*/    procedure point::imprimir()
+/*  8*/    {
+/*  9*/        PrintLn m_X," ",m_Y;
+/* 10*/    }
+/* 11*/    function f(x:integer):integer
+/* 12*/    {
+/* 13*/        return x+10;
+/* 14*/    }
+/* 15*/    procedure main()
+/* 16*/    {
+/* 17*/        var a:point;
+/* 18*/        a.m_X=10.0;
+/* 19*/        a.m_Y=20.0;
+/* 20*/        a.imprimir();
+/* 21*/        print f(40);
+/* 22*/    }
+/* 23*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones3
+TEST SintacticoPruebaLOOSSinExtensiones3 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaDesarroll4 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class point {
+/*  2*/        m_X:Real;
+/*  3*/        m_Y:Real;
+/*  4*/        procedure imprimir();
+/*  5*/    }
+/*  6*/    
+/*  7*/    procedure point::imprimir()
+/*  8*/    {
+/*  9*/        procedure pru()
+/* 10*/        {
+/* 11*/            PrintLn this^.m_X;
+/* 12*/        }
+/* 13*/        pru();
+/* 14*/    }
+/* 15*/    procedure main()
+/* 16*/    {
+/* 17*/        var a:point;
+/* 18*/        a.m_X=11.0;
+/* 19*/        a.m_Y=22.0;
+/* 20*/        a.imprimir();
+/* 21*/    }
+/* 22*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaDesarroll4
+TEST SintacticoPruebaDesarroll4 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones5 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class point {
+/*  2*/        m_X:Real;
+/*  3*/        m_Y:Real;
+/*  4*/        Constructor point(x:real,y:real);
+/*  5*/        Destructor point();
+/*  6*/        procedure imprimir();
+/*  7*/    }
+/*  8*/    
+/*  9*/    Constructor point(x:real,y:real)
+/* 10*/    {
+/* 11*/        m_X=x;
+/* 12*/        m_Y=y;
+/* 13*/    }
+/* 14*/    
+/* 15*/    Destructor point()
+/* 16*/    {
+/* 17*/        PrintLn "Destrucción de point";
+/* 18*/    }
+/* 19*/    
+/* 20*/    procedure point::imprimir()
+/* 21*/    {
+/* 22*/        PrintLn "(",m_X,",",m_Y,")";
+/* 23*/    }
+/* 24*/    procedure main()
+/* 25*/    {
+/* 26*/        var a:point(50.0,60.0);
+/* 27*/        a.imprimir();
+/* 28*/    }
+/* 29*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones5
+TEST SintacticoPruebaLOOSSinExtensiones5 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones6 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure f(a:real,&b:real,c:real)
+/*  2*/     {
+/*  3*/         //IMPRIMIR_TAULA_DE_SIMBOLS;
+/*  4*/         PrintLn a," ",b," ",c;
+/*  5*/         b=b+5;        
+/*  6*/     }
+/*  7*/     procedure main()
+/*  8*/     {
+/*  9*/         var x:real;
+/* 10*/         var y:real;
+/* 11*/         var z:real;
+/* 12*/         x=10.0;        
+/* 13*/         y=20.0;
+/* 14*/         z=30.0;
+/* 15*/         PrintLn x," ",y," ",z;
+/* 16*/         f(x,y,z);
+/* 17*/         PrintLn x," ",y," ",z;
+/* 18*/    
+/* 19*/     }
+/* 20*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones6
+TEST SintacticoPruebaLOOSSinExtensiones6 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones7 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class pru {
+/*  2*/        m_v:integer;
+/*  3*/        constructor pru();
+/*  4*/        destructor pru();
+/*  5*/        constructor pru(&obj:pru);
+/*  6*/    }
+/*  7*/    constructor pru()
+/*  8*/    {
+/*  9*/        PrintLn this," pru::pru()";
+/* 10*/    }
+/* 11*/    destructor pru()
+/* 12*/    {
+/* 13*/        PrintLn this," pru::~pru()";
+/* 14*/    }
+/* 15*/    constructor pru(&obj:pru)
+/* 16*/    {
+/* 17*/        PrintLn this," pru::pru(&obj:pru)";
+/* 18*/    }
+/* 19*/    procedure f(a:pru)
+/* 20*/    {
+/* 21*/    }
+/* 22*/    procedure main()
+/* 23*/    {
+/* 24*/        var x:pru;
+/* 25*/        f(x);
+/* 26*/    }
+/* 27*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones7
+TEST SintacticoPruebaLOOSSinExtensiones7 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones8 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class pru {
+/*  2*/        m_v:integer;
+/*  3*/        constructor pru();
+/*  4*/        constructor pru(v:Integer);
+/*  5*/        destructor pru();
+/*  6*/        constructor pru(&obj:pru);
+/*  7*/        procedure operator=(&obj:pru);
+/*  8*/    }
+/*  9*/    constructor pru()
+/* 10*/    {
+/* 11*/        m_v=0;
+/* 12*/        PrintLn this," ","pru::pru()";
+/* 13*/    }
+/* 14*/    constructor pru(v:Integer)
+/* 15*/    {
+/* 16*/        m_v=v;
+/* 17*/        PrintLn this," ",m_v,"pru::pru()";
+/* 18*/    }
+/* 19*/    destructor pru()
+/* 20*/    {
+/* 21*/        PrintLn this," ",m_v,"pru::~pru()";
+/* 22*/    }
+/* 23*/    constructor pru(&obj:pru)
+/* 24*/    {
+/* 25*/        m_v=obj.m_v;
+/* 26*/        PrintLn this," ",m_v,"pru::pru(&obj:pru)";
+/* 27*/    }
+/* 28*/    procedure pru::operator=(&obj:pru)
+/* 29*/    {
+/* 30*/        m_v=obj.m_v;
+/* 31*/        PrintLn this," ",m_v,"pru::operator=(&obj:pru)";
+/* 32*/    }
+/* 33*/    procedure f(a:pru)
+/* 34*/    {
+/* 35*/        PrintLn "f(a:pru)";
+/* 36*/    }
+/* 37*/    procedure main()
+/* 38*/    {
+/* 39*/        var x:pru(1);
+/* 40*/        var y:pru(2);
+/* 41*/        //x=y;
+/* 42*/        f(x=y);
+/* 43*/    }
+/* 44*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones8
+TEST SintacticoPruebaLOOSSinExtensiones8 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones10 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class pru {
+/*  2*/        m_v:integer;
+/*  3*/        constructor pru();
+/*  4*/        constructor pru(v:Integer);
+/*  5*/        destructor pru();
+/*  6*/        constructor pru(&obj:pru);
+/*  7*/        procedure operator=(&obj:pru);
+/*  8*/    }
+/*  9*/    constructor pru()
+/* 10*/    {
+/* 11*/        m_v=0;
+/* 12*/    }
+/* 13*/    constructor pru(v:Integer)
+/* 14*/    {
+/* 15*/        m_v=v;
+/* 16*/    }
+/* 17*/    destructor pru()
+/* 18*/    {
+/* 19*/    }
+/* 20*/    constructor pru(&obj:pru)
+/* 21*/    {
+/* 22*/        m_v=obj.m_v;
+/* 23*/    }
+/* 24*/    procedure pru::operator=(&obj:pru)
+/* 25*/    {
+/* 26*/        m_v=obj.m_v;
+/* 27*/    }
+/* 28*/    procedure p(t:array [5] of pru)
+/* 29*/    {
+/* 30*/        var i:integer;
+/* 31*/        i=0;
+/* 32*/        while i<5 do {
+/* 33*/            PrintLn "t[",i,"]=",t[i].m_v;            
+/* 34*/            i=i+1;
+/* 35*/        }
+/* 36*/    }
+/* 37*/    procedure main()
+/* 38*/    {
+/* 39*/        var tabla:array [5] of pru;
+/* 40*/        var i:integer;
+/* 41*/        i=0;
+/* 42*/        while i<5 do {
+/* 43*/            tabla[i].m_v=i;            
+/* 44*/            i=i+1;
+/* 45*/        }
+/* 46*/        p(tabla);
+/* 47*/    }
+/* 48*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones10
+TEST SintacticoPruebaLOOSSinExtensiones10 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones11 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class pru {
+/*  2*/        m_v:integer;
+/*  3*/        constructor pru();
+/*  4*/        constructor pru(v:Integer);
+/*  5*/        destructor pru();
+/*  6*/        constructor pru(&obj:pru);
+/*  7*/        procedure operator=(&obj:pru);
+/*  8*/    }
+/*  9*/    constructor pru()
+/* 10*/    {
+/* 11*/        m_v=0;
+/* 12*/        PrintLn this," ","pru::pru()";
+/* 13*/    }
+/* 14*/    constructor pru(v:Integer)
+/* 15*/    {
+/* 16*/        m_v=v;
+/* 17*/        PrintLn this," ",m_v,"pru::pru(v:Integer)";
+/* 18*/    }
+/* 19*/    destructor pru()
+/* 20*/    {
+/* 21*/        PrintLn this," ",m_v,"pru::~pru()";
+/* 22*/    }
+/* 23*/    constructor pru(&obj:pru)
+/* 24*/    {
+/* 25*/        m_v=obj.m_v;
+/* 26*/        PrintLn this," ",m_v,"pru::pru(&obj:pru)";
+/* 27*/    }
+/* 28*/    procedure pru::operator=(&obj:pru)
+/* 29*/    {
+/* 30*/        m_v=obj.m_v;
+/* 31*/        PrintLn this," ",m_v,"pru::operator=(&obj:pru)";
+/* 32*/    }
+/* 33*/    
+/* 34*/    class cb {
+/* 35*/        m_c1:integer;
+/* 36*/        m_c2:pru;
+/* 37*/        m_c3:integer;
+/* 38*/    }
+/* 39*/    
+/* 40*/    procedure main()
+/* 41*/    {
+/* 42*/        var obj:cb;
+/* 43*/    }
+/* 44*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones11
+TEST SintacticoPruebaLOOSSinExtensiones11 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones12 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class pru {
+/*  2*/        m_v:integer;
+/*  3*/        constructor pru();
+/*  4*/        constructor pru(v:Integer);
+/*  5*/        destructor pru();
+/*  6*/        constructor pru(&obj:pru);
+/*  7*/        procedure operator=(&obj:pru);
+/*  8*/    }
+/*  9*/    constructor pru()
+/* 10*/    {
+/* 11*/        m_v=0;
+/* 12*/        PrintLn this," ","pru::pru()";
+/* 13*/    }
+/* 14*/    constructor pru(v:Integer)
+/* 15*/    {
+/* 16*/        m_v=v;
+/* 17*/        PrintLn this," ",m_v,"pru::pru()";
+/* 18*/    }
+/* 19*/    destructor pru()
+/* 20*/    {
+/* 21*/        PrintLn this," ",m_v,"pru::~pru()";
+/* 22*/    }
+/* 23*/    constructor pru(&obj:pru)
+/* 24*/    {
+/* 25*/        m_v=obj.m_v;
+/* 26*/        PrintLn this," ",m_v,"pru::pru(&obj:pru)";
+/* 27*/    }
+/* 28*/    procedure pru::operator=(&obj:pru)
+/* 29*/    {
+/* 30*/        m_v=obj.m_v;
+/* 31*/        PrintLn this," ",m_v,"pru::operator=(&obj:pru)";
+/* 32*/    }
+/* 33*/    procedure main()
+/* 34*/    {
+/* 35*/        var p:^pru;
+/* 36*/        p=null;
+/* 37*/        PrintLn p;
+/* 38*/        p=new pru;
+/* 39*/        PrintLn p;
+/* 40*/        delete p;            
+/* 41*/    }
+/* 42*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones12
+TEST SintacticoPruebaLOOSSinExtensiones12 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones13 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var p:^Integer;
+/*  4*/        p=new Integer;
+/*  5*/        p^=10;
+/*  6*/        PrintLn "p^=",p^;
+/*  7*/        var q:^array [10] of integer;
+/*  8*/        q=new array [10] of integer;
+/*  9*/        var i:integer;
+/* 10*/        i=0;
+/* 11*/        while i<10 do {
+/* 12*/            q^[i]=i;
+/* 13*/            i=i+1;
+/* 14*/        }
+/* 15*/        i=0;
+/* 16*/        while i<10 do {
+/* 17*/            PrintLn i,":",q^[i];
+/* 18*/            i=i+1;
+/* 19*/        }
+/* 20*/        delete p;
+/* 21*/        delete q;
+/* 22*/    }
+/* 23*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones13
+TEST SintacticoPruebaLOOSSinExtensiones13 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones14 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class pru {
+/*  2*/        m_v:integer;
+/*  3*/        constructor pru();
+/*  4*/        constructor pru(v:Integer);
+/*  5*/        destructor pru();
+/*  6*/        constructor pru(&obj:pru);
+/*  7*/        procedure operator=(&obj:pru);
+/*  8*/    }
+/*  9*/    constructor pru()
+/* 10*/    {
+/* 11*/        m_v=0;
+/* 12*/        PrintLn this,": pru::pru()";
+/* 13*/    }
+/* 14*/    constructor pru(v:Integer)
+/* 15*/    {
+/* 16*/        m_v=v;
+/* 17*/        PrintLn this,": pru::pru(",m_v,")";
+/* 18*/    }
+/* 19*/    destructor pru()
+/* 20*/    {
+/* 21*/        PrintLn this,": ",m_v," pru::~pru()";
+/* 22*/    }
+/* 23*/    constructor pru(&obj:pru)
+/* 24*/    {
+/* 25*/        m_v=obj.m_v;
+/* 26*/        PrintLn this,": ",m_v," pru::pru(&obj:pru)";
+/* 27*/    }
+/* 28*/    procedure pru::operator=(&obj:pru)
+/* 29*/    {
+/* 30*/        m_v=obj.m_v;
+/* 31*/        PrintLn this,": ",m_v,"pru::operator=(&obj:pru)";
+/* 32*/    }
+/* 33*/    procedure main()
+/* 34*/    {
+/* 35*/        var p:^pru;
+/* 36*/        p=new pru;
+/* 37*/        delete p;
+/* 38*/        p=new pru(177);
+/* 39*/        delete p;
+/* 40*/        var q:^array [10] of pru;
+/* 41*/        q=new array [10] of pru;
+/* 42*/        var i:integer;
+/* 43*/        i=0;
+/* 44*/        while i<10 do {
+/* 45*/            q^[i].m_v=i;
+/* 46*/            i=i+1;
+/* 47*/        }
+/* 48*/        delete q;
+/* 49*/    }
+/* 50*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones14
+TEST SintacticoPruebaLOOSSinExtensiones14 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones15 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    var a:integer;
+/*  2*/    var taula:array [10] of integer;
+/*  3*/    procedure main()
+/*  4*/    {
+/*  5*/        var b:real;
+/*  6*/        a=10;
+/*  7*/        print a;
+/*  8*/        b=3.5;
+/*  9*/        print b;
+/* 10*/        taula[5]=15;
+/* 11*/        print taula[5];
+/* 12*/    }
+/* 13*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones15
+TEST SintacticoPruebaLOOSSinExtensiones15 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones16 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure p(a:integer, &b:integer)
+/*  2*/    {
+/*  3*/        print a,b;
+/*  4*/    }
+/*  5*/    procedure main()
+/*  6*/    {
+/*  7*/        var a:integer;
+/*  8*/        a=10;
+/*  9*/        p(a,a);
+/* 10*/    }
+/* 11*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones16
+TEST SintacticoPruebaLOOSSinExtensiones16 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones17 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    Class pru {
+/*  2*/        m_valor:integer;
+/*  3*/        constructor pru();
+/*  4*/        destructor pru();
+/*  5*/    }
+/*  6*/    Constructor pru()
+/*  7*/    {
+/*  8*/        m_valor=0;
+/*  9*/    }
+/* 10*/    Destructor pru()
+/* 11*/    {
+/* 12*/        print m_valor;
+/* 13*/    }
+/* 14*/    procedure main()
+/* 15*/    {
+/* 16*/        var obj1:pru;
+/* 17*/        obj1.m_valor=10;
+/* 18*/    }
+/* 19*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones17
+TEST SintacticoPruebaLOOSSinExtensiones17 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones18 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class pru {
+/*  2*/        m_v:integer;
+/*  3*/        constructor pru();
+/*  4*/        constructor pru(v:Integer);
+/*  5*/        destructor pru();
+/*  6*/        constructor pru(&obj:pru);
+/*  7*/        procedure operator=(&obj:pru);
+/*  8*/    }
+/*  9*/    constructor pru()
+/* 10*/    {
+/* 11*/        m_v=0;
+/* 12*/        PrintLn this,": pru::pru()";
+/* 13*/    }
+/* 14*/    constructor pru(v:Integer)
+/* 15*/    {
+/* 16*/        m_v=v;
+/* 17*/        PrintLn this,": pru::pru(",m_v,")";
+/* 18*/    }
+/* 19*/    destructor pru()
+/* 20*/    {
+/* 21*/        PrintLn this,": ",m_v," pru::~pru()";
+/* 22*/    }
+/* 23*/    constructor pru(&obj:pru)
+/* 24*/    {
+/* 25*/        m_v=obj.m_v;
+/* 26*/        PrintLn this,": ",m_v," pru::pru(&obj:pru)";
+/* 27*/    }
+/* 28*/    procedure pru::operator=(&obj:pru)
+/* 29*/    {
+/* 30*/        m_v=obj.m_v;
+/* 31*/        PrintLn this,": ",m_v," pru::operator=(&obj:pru)";
+/* 32*/    }
+/* 33*/    function f1(a:integer):integer
+/* 34*/    {
+/* 35*/        PrintLn a;
+/* 36*/        return a+20;
+/* 37*/    }
+/* 38*/    function f2(a:integer):pru
+/* 39*/    {
+/* 40*/        return pru(a);
+/* 41*/    }
+/* 42*/    
+/* 43*/    procedure main()
+/* 44*/    {
+/* 45*/        var b:integer;
+/* 46*/        b=f1(50);
+/* 47*/        var obj:pru;
+/* 48*/        obj=f2(60);
+/* 49*/        
+/* 50*/    }
+/* 51*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones18
+TEST SintacticoPruebaLOOSSinExtensiones18 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones19 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        print 10;
+/*  4*/        print 20.5;
+/*  5*/        print 'a';            
+/*  6*/    }
+/*  7*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones19
+TEST SintacticoPruebaLOOSSinExtensiones19 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones20 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var a:integer;
+/*  4*/        var b:bool;
+/*  5*/        a=10;
+/*  6*/        b=true;
+/*  7*/        print -a;
+/*  8*/        print !b;
+/*  9*/        print &a;            
+/* 10*/    }
+/* 11*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones20
+TEST SintacticoPruebaLOOSSinExtensiones20 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones21 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var a:bool;
+/*  4*/        var b:bool;
+/*  5*/        var c:bool;
+/*  6*/        a=true;
+/*  7*/        b=false;
+/*  8*/        c=true;
+/*  9*/        print a && b && c;
+/* 10*/        print a || b || c;
+/* 11*/    }
+/* 12*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones21
+TEST SintacticoPruebaLOOSSinExtensiones21 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones22 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    Class pru {
+/*  2*/        m_v:integer;
+/*  3*/        Constructor pru();
+/*  4*/        Constructor pru(v:Integer);
+/*  5*/        Destructor pru();
+/*  6*/    }
+/*  7*/    Constructor pru()
+/*  8*/    {
+/*  9*/        m_v=0;
+/* 10*/        PrintLn this,": pru::pru()";
+/* 11*/    }
+/* 12*/    Constructor pru(v:Integer)
+/* 13*/    {
+/* 14*/        m_v=v;
+/* 15*/        PrintLn this,": pru::pru(",m_v,")";
+/* 16*/    }
+/* 17*/    Destructor pru()
+/* 18*/    {
+/* 19*/        PrintLn this,": ",m_v," pru::~pru()";
+/* 20*/    }
+/* 21*/    procedure main()
+/* 22*/    {
+/* 23*/        var pInt:^Integer;
+/* 24*/        pInt=new Integer;
+/* 25*/        var pPru:^pru;
+/* 26*/        pPru=new pru(128);
+/* 27*/    }
+/* 28*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones22
+TEST SintacticoPruebaLOOSSinExtensiones22 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones24 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    Class pru {
+/*  2*/        m_v:integer;
+/*  3*/        Constructor pru();
+/*  4*/        Constructor pru(v:Integer);
+/*  5*/        Destructor pru();
+/*  6*/    }
+/*  7*/    Constructor pru()
+/*  8*/    {
+/*  9*/        m_v=0;
+/* 10*/        PrintLn this,": pru::pru()";
+/* 11*/    }
+/* 12*/    Constructor pru(v:Integer)
+/* 13*/    {
+/* 14*/        m_v=v;
+/* 15*/        PrintLn this,": pru::pru(",m_v,")";
+/* 16*/    }
+/* 17*/    Destructor pru()
+/* 18*/    {
+/* 19*/        PrintLn this,": ",m_v," pru::~pru()";
+/* 20*/    }
+/* 21*/    procedure main()
+/* 22*/    {
+/* 23*/        Var pPru:^array [3] of pru;
+/* 24*/        pPru=new array [3] of pru;
+/* 25*/    }
+/* 26*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones24
+TEST SintacticoPruebaLOOSSinExtensiones24 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones25 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    Class pru {
+/*  2*/        m_v:integer;
+/*  3*/        Constructor pru();
+/*  4*/        Constructor pru(v:Integer);
+/*  5*/        Destructor pru();
+/*  6*/        procedure operator=(&v:pru);
+/*  7*/    }
+/*  8*/    Constructor pru()
+/*  9*/    {
+/* 10*/        m_v=0;
+/* 11*/        PrintLn this,": pru::pru()";
+/* 12*/    }
+/* 13*/    Constructor pru(v:Integer)
+/* 14*/    {
+/* 15*/        m_v=v;
+/* 16*/        PrintLn this,": pru::pru(",m_v,")";
+/* 17*/    }
+/* 18*/    Destructor pru()
+/* 19*/    {
+/* 20*/        PrintLn this,": ",m_v," pru::~pru()";
+/* 21*/    }
+/* 22*/    procedure pru::operator=(&v:pru)
+/* 23*/    {
+/* 24*/        m_v=v.m_v;
+/* 25*/        PrintLn this,": ",m_v," pru::operator=(&v:pru)";
+/* 26*/    }
+/* 27*/    procedure main()
+/* 28*/    {
+/* 29*/        Var obj:Pru;
+/* 30*/        obj=Pru();
+/* 31*/        obj=Pru(256);
+/* 32*/    }
+/* 33*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones25
+TEST SintacticoPruebaLOOSSinExtensiones25 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones26 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    Function f(a:Integer,&b:Integer):Integer
+/*  2*/    {
+/*  3*/        b=b+10;
+/*  4*/        return a+b;
+/*  5*/    }
+/*  6*/    procedure main()
+/*  7*/    {
+/*  8*/        Var c:Integer;
+/*  9*/        c=100;
+/* 10*/        print f(50,c);
+/* 11*/    }
+/* 12*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones26
+TEST SintacticoPruebaLOOSSinExtensiones26 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones27 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    Procedure p(a:Integer,&b:Integer)
+/*  2*/    {
+/*  3*/        b=b+a;
+/*  4*/    }
+/*  5*/    procedure main()
+/*  6*/    {
+/*  7*/        Var c:Integer;
+/*  8*/        c=100;
+/*  9*/        p(50,c);
+/* 10*/    }
+/* 11*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones27
+TEST SintacticoPruebaLOOSSinExtensiones27 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones28 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    Class pru {
+/*  2*/        m_v:integer;
+/*  3*/        Constructor pru();
+/*  4*/        Constructor pru(v:Integer);
+/*  5*/        constructor pru(&obj:pru);
+/*  6*/        Destructor pru();
+/*  7*/        procedure operator=(&v:pru);
+/*  8*/    }
+/*  9*/    Constructor pru()
+/* 10*/    {
+/* 11*/        m_v=0;
+/* 12*/        PrintLn this,": pru::pru()";
+/* 13*/    }
+/* 14*/    Constructor pru(v:Integer)
+/* 15*/    {
+/* 16*/        m_v=v;
+/* 17*/        PrintLn this,": pru::pru(",m_v,")";
+/* 18*/    }
+/* 19*/    constructor pru(&obj:pru)
+/* 20*/    {
+/* 21*/        m_v=obj.m_v;
+/* 22*/        PrintLn this,": ",m_v," pru::pru(&obj:pru)";
+/* 23*/    }
+/* 24*/    Destructor pru()
+/* 25*/    {
+/* 26*/        PrintLn this,": ",m_v," pru::~pru()";
+/* 27*/    }
+/* 28*/    procedure pru::operator=(&v:pru)
+/* 29*/    {
+/* 30*/        m_v=v.m_v;
+/* 31*/        PrintLn this,": ",m_v," pru::operator=(&v:pru)";
+/* 32*/    }
+/* 33*/    Function f(obj:Pru):Pru
+/* 34*/    {
+/* 35*/        return obj;
+/* 36*/    }
+/* 37*/    procedure main()
+/* 38*/    {
+/* 39*/        Var a:Pru(50);
+/* 40*/        Var b:pru;
+/* 41*/        b=f(a);
+/* 42*/    }
+/* 43*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones28
+TEST SintacticoPruebaLOOSSinExtensiones28 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones29 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    Class pru {
+/*  2*/        m_v:integer;
+/*  3*/        Procedure m(a:Integer);
+/*  4*/    }
+/*  5*/    Procedure pru::m(a:Integer)
+/*  6*/    {
+/*  7*/        m_v=a;
+/*  8*/    }
+/*  9*/    procedure main()
+/* 10*/    {
+/* 11*/        Var obj:Pru;
+/* 12*/        obj.m(150);
+/* 13*/    }
+/* 14*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones29
+TEST SintacticoPruebaLOOSSinExtensiones29 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones30 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    Procedure p1()
+/*  2*/    {
+/*  3*/        
+/*  4*/        Procedure p2()
+/*  5*/        {
+/*  6*/            Procedure p3()
+/*  7*/            {
+/*  8*/                p3();
+/*  9*/                p2();
+/* 10*/                p1();                    
+/* 11*/            }
+/* 12*/            p3();
+/* 13*/        }
+/* 14*/        p2();
+/* 15*/    }
+/* 16*/    procedure main()
+/* 17*/    {
+/* 18*/    }
+/* 19*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones30
+TEST SintacticoPruebaLOOSSinExtensiones30 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones31 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class pru {
+/*  2*/        m_v:integer;
+/*  3*/    }
+/*  4*/    function f2(a:integer):pru
+/*  5*/    {
+/*  6*/        var obj:pru;
+/*  7*/        obj.m_v=a;
+/*  8*/        return obj;
+/*  9*/    }        
+/* 10*/    procedure main()
+/* 11*/    {
+/* 12*/        var c:pru;
+/* 13*/        c=f2(60);            
+/* 14*/    }
+/* 15*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones31
+TEST SintacticoPruebaLOOSSinExtensiones31 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones32 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class pru {
+/*  2*/        m_v1:integer;
+/*  3*/        m_v2:integer;
+/*  4*/        procedure m();
+/*  5*/    }
+/*  6*/    procedure pru::m()
+/*  7*/    {
+/*  8*/        print m_v1;
+/*  9*/        print m_v2;
+/* 10*/    }   
+/* 11*/    var global:integer;
+/* 12*/    procedure main()
+/* 13*/    {
+/* 14*/        global=10;
+/* 15*/        print global;
+/* 16*/        var local:integer;
+/* 17*/        local=50;
+/* 18*/        print local;
+/* 19*/        var obj:pru;
+/* 20*/        obj.m_v1=105;
+/* 21*/        obj.m_v2=205;
+/* 22*/        obj.m();
+/* 23*/        procedure p(x:integer, &y:integer) {
+/* 24*/            print x;
+/* 25*/            print y;
+/* 26*/            print local;
+/* 27*/        }
+/* 28*/    }
+/* 29*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones32
+TEST SintacticoPruebaLOOSSinExtensiones32 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones33 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var taula:array [10] of integer;
+/*  4*/        taula[6]=128;
+/*  5*/    }
+/*  6*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones33
+TEST SintacticoPruebaLOOSSinExtensiones33 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones34 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class myclass {
+/*  2*/        m_c1:real;
+/*  3*/        m_c2:integer;
+/*  4*/    }
+/*  5*/    procedure main()
+/*  6*/    {
+/*  7*/        var obj:myclass;
+/*  8*/        obj.m_c2=50;
+/*  9*/    }
+/* 10*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones34
+TEST SintacticoPruebaLOOSSinExtensiones34 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones35 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var p:^Integer;
+/*  4*/        var a:Integer;
+/*  5*/        a=10;
+/*  6*/        p=&a;
+/*  7*/        print p^;
+/*  8*/    }
+/*  9*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones35
+TEST SintacticoPruebaLOOSSinExtensiones35 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones36 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class myclass {
+/*  2*/        m_c1:real;
+/*  3*/        m_c2:^myclass;
+/*  4*/    }
+/*  5*/    procedure main()
+/*  6*/    {
+/*  7*/        var t:array [5] of myclass;
+/*  8*/        t[5].m_c2=&t[0];
+/*  9*/        t[5].m_c2^.m_c1=128.0;
+/* 10*/    }
+/* 11*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones36
+TEST SintacticoPruebaLOOSSinExtensiones36 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSSinExtensiones37 OBLIGATORIO
+DESCRIPCION: Prueba del compilador de LOOS sin extensiones
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class Complex {
+/*  2*/        m_Real:Real;
+/*  3*/        m_Imaginary:Real;
+/*  4*/        procedure operator=(&v:Complex);
+/*  5*/    }
+/*  6*/    procedure Complex::operator=(&v:Complex)
+/*  7*/    {
+/*  8*/        m_Real=v.m_real;
+/*  9*/        m_Imaginary=v.m_Imaginary;
+/* 10*/    }
+/* 11*/    procedure main()
+/* 12*/    {
+/* 13*/        var n1:Complex;
+/* 14*/        var n2:Complex;
+/* 15*/        n1.m_Real=10.5;
+/* 16*/        n1.m_Real=8.2;
+/* 17*/        n2=n1;
+/* 18*/    }
+/* 19*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSSinExtensiones37
+TEST SintacticoPruebaLOOSSinExtensiones37 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSAsignacionArrayObjetoSubClaseSinAsignador OBLIGATORIO
+DESCRIPCION: Verifica el funcionamiento de la asignación con arrays de objetos de clase derivada
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class myClass {
+/*  2*/        m_c1:Integer;
+/*  3*/    }
+/*  4*/    class mySubClass :myClass {
+/*  5*/        m_c2:Integer;
+/*  6*/    }
+/*  7*/    procedure main()
+/*  8*/    {
+/*  9*/        var a:array [3] of mySubClass;
+/* 10*/        a[0].m_C1=10;
+/* 11*/        a[0].m_C2=15;
+/* 12*/        a[1].m_C1=20;
+/* 13*/        a[1].m_C2=25;
+/* 14*/        a[2].m_C1=30;
+/* 15*/        a[2].m_C2=35;
+/* 16*/        var b:array [3] of myClass;
+/* 17*/        b=a;
+/* 18*/        PrintLn "a[0].m_C1=",a[0].m_C1;
+/* 19*/        PrintLn "a[0].m_C2=",a[0].m_C2;
+/* 20*/        PrintLn "a[1].m_C1=",a[1].m_C1;
+/* 21*/        PrintLn "a[1].m_C2=",a[1].m_C2;
+/* 22*/        PrintLn "a[2].m_C1=",a[2].m_C1;
+/* 23*/        PrintLn "a[2].m_C2=",a[2].m_C2;
+/* 24*/        PrintLn "b[0].m_C1=",b[0].m_C1;
+/* 25*/        PrintLn "b[1].m_C1=",b[1].m_C1;
+/* 26*/        PrintLn "b[2].m_C1=",b[2].m_C1;
+/* 27*/        PrintLn "&a-&b=",&a-&b;
+/* 28*/        IMPRIMIR_TAULA_DE_SIMBOLS;
+/* 29*/    }
+/* 30*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSAsignacionArrayObjetoSubClaseSinAsignador
+TEST SintacticoPruebaLOOSAsignacionArrayObjetoSubClaseSinAsignador OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSAsignacionArrayObjetoSubClaseConAsignador OBLIGATORIO
+DESCRIPCION: Verifica el funcionamiento de la asignación con arrays de objetos de clase derivada
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class myClass {
+/*  2*/        m_c1:Integer;
+/*  3*/        Procedure operator=(&obj:myClass);
+/*  4*/    }
+/*  5*/    Procedure myClass::operator=(&obj:myClass)
+/*  6*/    {
+/*  7*/        m_c1=obj.m_c1;
+/*  8*/        printLn "operator=(&obj:myClass): ",m_c1;
+/*  9*/    }
+/* 10*/    class mySubClass :myClass {
+/* 11*/        m_c2:Integer;
+/* 12*/    }
+/* 13*/    procedure main()
+/* 14*/    {
+/* 15*/        var a:array [3] of mySubClass;
+/* 16*/        a[0].m_C1=10;
+/* 17*/        a[0].m_C2=15;
+/* 18*/        a[1].m_C1=20;
+/* 19*/        a[1].m_C2=25;
+/* 20*/        a[2].m_C1=30;
+/* 21*/        a[2].m_C2=35;
+/* 22*/        var b:array [3] of myClass;
+/* 23*/        b=a;
+/* 24*/        PrintLn "a[0].m_C1=",a[0].m_C1;
+/* 25*/        PrintLn "a[0].m_C2=",a[0].m_C2;
+/* 26*/        PrintLn "a[1].m_C1=",a[1].m_C1;
+/* 27*/        PrintLn "a[1].m_C2=",a[1].m_C2;
+/* 28*/        PrintLn "a[2].m_C1=",a[2].m_C1;
+/* 29*/        PrintLn "a[2].m_C2=",a[2].m_C2;
+/* 30*/        PrintLn "b[0].m_C1=",b[0].m_C1;
+/* 31*/        PrintLn "b[1].m_C1=",b[1].m_C1;
+/* 32*/        PrintLn "b[2].m_C1=",b[2].m_C1;
+/* 33*/        PrintLn "&a-&b=",&a-&b;
+/* 34*/        IMPRIMIR_TAULA_DE_SIMBOLS;
+/* 35*/    }
+/* 36*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSAsignacionArrayObjetoSubClaseConAsignador
+TEST SintacticoPruebaLOOSAsignacionArrayObjetoSubClaseConAsignador OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSCopiaArrayObjetoSubClaseSinConstructor OBLIGATORIO
+DESCRIPCION: Verifica el funcionamiento del paso de parametros con arrays de objetos de clase derivada
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class myClass {
+/*  2*/        m_c1:Integer;
+/*  3*/    }
+/*  4*/    class mySubClass :myClass {
+/*  5*/        m_c2:Integer;
+/*  6*/    }
+/*  7*/    procedure f(b:array [3] of myClass)
+/*  8*/    {
+/*  9*/        PrintLn "b[0].m_C1=",b[0].m_C1;
+/* 10*/        PrintLn "b[1].m_C1=",b[1].m_C1;
+/* 11*/        PrintLn "b[2].m_C1=",b[2].m_C1;
+/* 12*/    }
+/* 13*/    procedure main()
+/* 14*/    {
+/* 15*/        var a:array [3] of mySubClass;
+/* 16*/        a[0].m_C1=10;
+/* 17*/        a[0].m_C2=15;
+/* 18*/        a[1].m_C1=20;
+/* 19*/        a[1].m_C2=25;
+/* 20*/        a[2].m_C1=30;
+/* 21*/        a[2].m_C2=35;
+/* 22*/        f(a);
+/* 23*/        PrintLn "a[0].m_C1=",a[0].m_C1;
+/* 24*/        PrintLn "a[0].m_C2=",a[0].m_C2;
+/* 25*/        PrintLn "a[1].m_C1=",a[1].m_C1;
+/* 26*/        PrintLn "a[1].m_C2=",a[1].m_C2;
+/* 27*/        PrintLn "a[2].m_C1=",a[2].m_C1;
+/* 28*/        PrintLn "a[2].m_C2=",a[2].m_C2;
+/* 29*/        IMPRIMIR_TAULA_DE_SIMBOLS;
+/* 30*/    }
+/* 31*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSCopiaArrayObjetoSubClaseSinConstructor
+TEST SintacticoPruebaLOOSCopiaArrayObjetoSubClaseSinConstructor OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSCopiaArrayObjetoSubClaseConConstructor OBLIGATORIO
+DESCRIPCION: Verifica el funcionamiento del paso de parametros con arrays de objetos de clase derivada
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class myClass {
+/*  2*/        m_c1:Integer;
+/*  3*/        Constructor myClass();
+/*  4*/        Constructor myClass(&obj:myClass);
+/*  5*/    }
+/*  6*/    Constructor myClass()
+/*  7*/    {
+/*  8*/        m_c1=0;
+/*  9*/        PrintLn "myClass()";
+/* 10*/        
+/* 11*/    }
+/* 12*/    Constructor myClass(&obj:myClass)
+/* 13*/    {
+/* 14*/        m_c1=obj.m_c1;
+/* 15*/        PrintLn "myClass(&obj:myClass): ",m_c1;
+/* 16*/        
+/* 17*/    }
+/* 18*/    class mySubClass :myClass {
+/* 19*/        m_c2:Integer;
+/* 20*/    }
+/* 21*/    procedure f(b:array [3] of myClass)
+/* 22*/    {
+/* 23*/        PrintLn "b[0].m_C1=",b[0].m_C1;
+/* 24*/        PrintLn "b[1].m_C1=",b[1].m_C1;
+/* 25*/        PrintLn "b[2].m_C1=",b[2].m_C1;
+/* 26*/    }
+/* 27*/    procedure main()
+/* 28*/    {
+/* 29*/        var a:array [3] of mySubClass;
+/* 30*/        IMPRIMIR_TAULA_DE_SIMBOLS;
+/* 31*/        a[0].m_C1=10;
+/* 32*/        a[0].m_C2=15;
+/* 33*/        a[1].m_C1=20;
+/* 34*/        a[1].m_C2=25;
+/* 35*/        a[2].m_C1=30;
+/* 36*/        a[2].m_C2=35;
+/* 37*/        f(a);
+/* 38*/        PrintLn "a[0].m_C1=",a[0].m_C1;
+/* 39*/        PrintLn "a[0].m_C2=",a[0].m_C2;
+/* 40*/        PrintLn "a[1].m_C1=",a[1].m_C1;
+/* 41*/        PrintLn "a[1].m_C2=",a[1].m_C2;
+/* 42*/        PrintLn "a[2].m_C1=",a[2].m_C1;
+/* 43*/        PrintLn "a[2].m_C2=",a[2].m_C2;
+/* 44*/    }
+/* 45*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSCopiaArrayObjetoSubClaseConConstructor
+TEST SintacticoPruebaLOOSCopiaArrayObjetoSubClaseConConstructor OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSInicializacinesPorConstruccionPorCopiaSinConstructor OBLIGATORIO
+DESCRIPCION: Verifica el funcionamiento de la construcción por copia
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class myClass {
+/*  2*/        m_c1:Integer;
+/*  3*/    }
+/*  4*/    class mySubClass :myClass {
+/*  5*/        m_c2:Integer;
+/*  6*/    }
+/*  7*/    procedure main()
+/*  8*/    {
+/*  9*/        var obj1:myClass;
+/* 10*/        obj1.m_C1=10;
+/* 11*/        var obj2:myClass(obj1);
+/* 12*/        PrintLn "obj1.m_c1=",obj1.m_c1;
+/* 13*/        PrintLn "obj2.m_c1=",obj2.m_c1;
+/* 14*/        var obj3:mySubClass;
+/* 15*/        obj3.m_c1=20;
+/* 16*/        obj3.m_c2=30;
+/* 17*/        var obj4:myClass(obj3);
+/* 18*/        PrintLn "obj3.m_c1=",obj3.m_c1;
+/* 19*/        PrintLn "obj3.m_c2=",obj3.m_c2;
+/* 20*/        PrintLn "obj4.m_c1=",obj4.m_c1;
+/* 21*/        var obj5:myClass(obj3);
+/* 22*/        PrintLn "obj5.m_c1=",obj4.m_c1;
+/* 23*/        var a1:integer(40);
+/* 24*/        PrintLn "a1=",a1;
+/* 25*/        IMPRIMIR_TAULA_DE_SIMBOLS;
+/* 26*/    }
+/* 27*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSInicializacinesPorConstruccionPorCopiaSinConstructor
+TEST SintacticoPruebaLOOSInicializacinesPorConstruccionPorCopiaSinConstructor OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSAsignacionMultipleSinAsignador OBLIGATORIO
+DESCRIPCION: Verifica el funcionamiento de la asignación multiple sin asignador
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class myClass {
+/*  2*/        m_c1:Integer;
+/*  3*/    }
+/*  4*/    class mySubClass :myClass {
+/*  5*/        m_c2:Integer;
+/*  6*/    }
+/*  7*/    procedure main()
+/*  8*/    {
+/*  9*/        // Prueba con objetos sin asignador
+/* 10*/        var obj1:myClass;
+/* 11*/        obj1.m_C1=10;
+/* 12*/        var obj2:myClass;
+/* 13*/        var obj3:myClass;
+/* 14*/        obj3=obj2=obj1;
+/* 15*/        PrintLn "obj1.m_c1=",obj1.m_c1;
+/* 16*/        PrintLn "obj2.m_c1=",obj2.m_c1;
+/* 17*/        PrintLn "obj3.m_c1=",obj3.m_c1;
+/* 18*/        var obj4:mySubClass;
+/* 19*/        obj4.m_c1=20;
+/* 20*/        obj4.m_c2=30;
+/* 21*/        var obj5:myClass;
+/* 22*/        var obj6:myClass;
+/* 23*/        obj6=obj5=obj4;
+/* 24*/        PrintLn "obj4.m_c1=",obj4.m_c1;
+/* 25*/        PrintLn "obj4.m_c2=",obj4.m_c2;
+/* 26*/        PrintLn "obj5.m_c1=",obj5.m_c1;
+/* 27*/        PrintLn "obj6.m_c1=",obj6.m_c1;
+/* 28*/        
+/* 29*/        // Prueba con arrays
+/* 30*/        var ar1:array [3] of  mySubClass;
+/* 31*/        var ar2:array [3] of myClass;
+/* 32*/        var ar3:array [3] of myClass;
+/* 33*/        var ar4:array [3] of myClass;
+/* 34*/        ar1[0].m_c1=40;
+/* 35*/        ar1[0].m_c2=50;
+/* 36*/        ar1[1].m_c1=60;
+/* 37*/        ar1[1].m_c2=70;
+/* 38*/        ar1[2].m_c1=80;
+/* 39*/        ar1[2].m_c2=90;
+/* 40*/        ar3=ar2=ar1;
+/* 41*/        ar4=ar3;
+/* 42*/        PrintLn "ar1[0].m_c1=",ar1[0].m_c1;
+/* 43*/        PrintLn "ar1[0].m_c2=",ar1[0].m_c2;
+/* 44*/        PrintLn "ar1[1].m_c1=",ar1[1].m_c1;
+/* 45*/        PrintLn "ar1[1].m_c2=",ar1[1].m_c2;
+/* 46*/        PrintLn "ar1[2].m_c1=",ar1[2].m_c1;
+/* 47*/        PrintLn "ar1[2].m_c2=",ar1[2].m_c2;
+/* 48*/    
+/* 49*/        PrintLn "ar2[0].m_c1=",ar2[0].m_c1;
+/* 50*/        PrintLn "ar2[1].m_c1=",ar2[1].m_c1;
+/* 51*/        PrintLn "ar2[2].m_c1=",ar2[2].m_c1;
+/* 52*/        
+/* 53*/        PrintLn "ar3[0].m_c1=",ar3[0].m_c1;
+/* 54*/        PrintLn "ar3[1].m_c1=",ar3[1].m_c1;
+/* 55*/        PrintLn "ar3[2].m_c1=",ar3[2].m_c1;
+/* 56*/    
+/* 57*/        PrintLn "ar4[0].m_c1=",ar4[0].m_c1;
+/* 58*/        PrintLn "ar4[1].m_c1=",ar4[1].m_c1;
+/* 59*/        PrintLn "ar4[2].m_c1=",ar4[2].m_c1;
+/* 60*/        
+/* 61*/        var a:integer;
+/* 62*/        var b:integer;
+/* 63*/        var c:integer;
+/* 64*/        a=100;
+/* 65*/        c=b=a;
+/* 66*/        PrintLn "a=",a;
+/* 67*/        PrintLn "b=",b;
+/* 68*/        PrintLn "c=",c;
+/* 69*/        
+/* 70*/    }
+/* 71*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSAsignacionMultipleSinAsignador
+TEST SintacticoPruebaLOOSAsignacionMultipleSinAsignador OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoPruebaLOOSAsignacionMultipleSConAsignador OBLIGATORIO
+DESCRIPCION: Verifica el funcionamiento de la asignación multiple con asignador
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    class myClass {
+/*  2*/        m_c1:Integer;
+/*  3*/        procedure operator=(&obj:myClass);
+/*  4*/    }
+/*  5*/    procedure myClass::operator=(&obj:myClass)
+/*  6*/    {
+/*  7*/        println "Asignador ",obj.m_C1;
+/*  8*/        m_c1=obj.m_c1;
+/*  9*/    }
+/* 10*/    class mySubClass :myClass {
+/* 11*/        m_c2:Integer;
+/* 12*/    }
+/* 13*/    procedure main()
+/* 14*/    {
+/* 15*/        // Prueba con objetos sin asignador
+/* 16*/        var obj1:myClass;
+/* 17*/        obj1.m_C1=10;
+/* 18*/        var obj2:myClass;
+/* 19*/        var obj3:myClass;
+/* 20*/        obj3=obj2=obj1;
+/* 21*/        PrintLn "obj1.m_c1=",obj1.m_c1;
+/* 22*/        PrintLn "obj2.m_c1=",obj2.m_c1;
+/* 23*/        PrintLn "obj3.m_c1=",obj3.m_c1;
+/* 24*/        var obj4:mySubClass;
+/* 25*/        obj4.m_c1=20;
+/* 26*/        obj4.m_c2=30;
+/* 27*/        var obj5:myClass;
+/* 28*/        var obj6:myClass;
+/* 29*/        obj6=obj5=obj4;
+/* 30*/        PrintLn "obj4.m_c1=",obj4.m_c1;
+/* 31*/        PrintLn "obj4.m_c2=",obj4.m_c2;
+/* 32*/        PrintLn "obj5.m_c1=",obj5.m_c1;
+/* 33*/        PrintLn "obj6.m_c1=",obj6.m_c1;
+/* 34*/        
+/* 35*/        // Prueba con arrays
+/* 36*/        var ar1:array [3] of  mySubClass;
+/* 37*/        var ar2:array [3] of myClass;
+/* 38*/        var ar3:array [3] of myClass;
+/* 39*/        var ar4:array [3] of myClass;
+/* 40*/        ar1[0].m_c1=40;
+/* 41*/        ar1[0].m_c2=50;
+/* 42*/        ar1[1].m_c1=60;
+/* 43*/        ar1[1].m_c2=70;
+/* 44*/        ar1[2].m_c1=80;
+/* 45*/        ar1[2].m_c2=90;
+/* 46*/        ar3=ar2=ar1;
+/* 47*/        ar4=ar3;
+/* 48*/        PrintLn "ar1[0].m_c1=",ar1[0].m_c1;
+/* 49*/        PrintLn "ar1[0].m_c2=",ar1[0].m_c2;
+/* 50*/        PrintLn "ar1[1].m_c1=",ar1[1].m_c1;
+/* 51*/        PrintLn "ar1[1].m_c2=",ar1[1].m_c2;
+/* 52*/        PrintLn "ar1[2].m_c1=",ar1[2].m_c1;
+/* 53*/        PrintLn "ar1[2].m_c2=",ar1[2].m_c2;
+/* 54*/    
+/* 55*/        PrintLn "ar2[0].m_c1=",ar2[0].m_c1;
+/* 56*/        PrintLn "ar2[1].m_c1=",ar2[1].m_c1;
+/* 57*/        PrintLn "ar2[2].m_c1=",ar2[2].m_c1;
+/* 58*/        
+/* 59*/        PrintLn "ar3[0].m_c1=",ar3[0].m_c1;
+/* 60*/        PrintLn "ar3[1].m_c1=",ar3[1].m_c1;
+/* 61*/        PrintLn "ar3[2].m_c1=",ar3[2].m_c1;
+/* 62*/    
+/* 63*/        PrintLn "ar4[0].m_c1=",ar4[0].m_c1;
+/* 64*/        PrintLn "ar4[1].m_c1=",ar4[1].m_c1;
+/* 65*/        PrintLn "ar4[2].m_c1=",ar4[2].m_c1;            
+/* 66*/    }
+/* 67*/    
+--------------------------------------------------------
+Analitzant SintacticoPruebaLOOSAsignacionMultipleSConAsignador
+TEST SintacticoPruebaLOOSAsignacionMultipleSConAsignador OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoInstruccionCase OBLIGATORIO
+DESCRIPCION: Verifica el funcionamiento básico de la instruccion case exp of {c: ins ... else ins }
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var i:integer;
+/*  4*/        i=0;
+/*  5*/        while i<5 do {
+/*  6*/            case i of {
+/*  7*/            0: PrintLn "caso 0";
+/*  8*/            1: PrintLn "caso 1";
+/*  9*/            2: PrintLn "caso 2";
+/* 10*/            3: PrintLn "caso 3";
+/* 11*/            else PrintLn "no caso";
+/* 12*/            }
+/* 13*/            i=i+1;
+/* 14*/        }
+/* 15*/    }
+/* 16*/    
+--------------------------------------------------------
+Analitzant SintacticoInstruccionCase
+TEST SintacticoInstruccionCase OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoInstruccionCaseSinELSE OBLIGATORIO
+DESCRIPCION: Verifica el funcionamiento básico de la instruccion case exp of {c: ins ... else ins }
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var i:integer;
+/*  4*/        i=0;
+/*  5*/        while i<5 do {
+/*  6*/            case i of {
+/*  7*/            0: PrintLn "caso 0";
+/*  8*/            1: PrintLn "caso 1";
+/*  9*/            2: PrintLn "caso 2";
+/* 10*/            3: PrintLn "caso 3";
+/* 11*/            }
+/* 12*/            i=i+1;
+/* 13*/        }
+/* 14*/    }
+/* 15*/    
+--------------------------------------------------------
+Analitzant SintacticoInstruccionCaseSinELSE
+TEST SintacticoInstruccionCaseSinELSE OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoInstruccionCaseErrorSintactico1 OBLIGATORIO
+DESCRIPCION: Verifica que se detectan correctamente errores sintácticos en case of
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var i:Integer;
+/*  4*/        case i+2 of {
+/*  5*/        PrintLn "caso 0";
+/*  6*/        1: PrintLn "caso 1";
+/*  7*/        2: PrintLn "caso 2";
+/*  8*/        3: PrintLn "caso 3";
+/*  9*/        else PrintLn "no caso";
+/* 10*/        }
+/* 11*/    }
+/* 12*/    
+--------------------------------------------------------
+Analitzant SintacticoInstruccionCaseErrorSintactico1
+Error a la linea 5 del fitxer SintacticoInstruccionCaseErrorSintactico1
+			PrintLn
+			^ Error sintàctic: Error en selecció. S'esperava [!,~,-,&,(,Numero,Caracter,String,True,False,Null,New,this,Identificador]
+Call stack:
+0115C591: Constructor BackTrace(n:#Int)
+011588BF: Constructor Exception(Args...)
+01149687: Constructor SyntaxError(Args...)
+011F2FD0: Thrower ParserError(Args...)
+0122093D: Proc PARSER_factor()
+0124F47F: Proc PARSER_instruccio()
+01253EC8: Proc PARSER_bloc()
+01254A7E: Proc PARSER_DecProc()
+0125DCD1: Proc PARSER_programa()
+0125E5B2: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+
+TEST SintacticoInstruccionCaseErrorSintactico1 OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoInstruccionCaseErrorSintacticoExpresion OBLIGATORIO
+DESCRIPCION: Verifica que sólo se pueden poner literales (constantes) en los casos
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var i:Integer;
+/*  4*/        case i of {
+/*  5*/        10+20: PrintLn "caso 10+20";
+/*  6*/        1: PrintLn "caso 0";
+/*  7*/        2: PrintLn "caso 2";
+/*  8*/        3: PrintLn "caso 3";
+/*  9*/        }
+/* 10*/    }
+/* 11*/    
+--------------------------------------------------------
+Analitzant SintacticoInstruccionCaseErrorSintacticoExpresion
+Error a la linea 5 del fitxer SintacticoInstruccionCaseErrorSintacticoExpresion
+			10+
+			  ^ Error sintàctic: Se esperaba el terminal :
+Call stack:
+0115C591: Constructor BackTrace(n:#Int)
+011588BF: Constructor Exception(Args...)
+01149687: Constructor SyntaxError(Args...)
+011F2FD0: Thrower ParserError(Args...)
+0124F4C6: Proc PARSER_instruccio()
+01253EC8: Proc PARSER_bloc()
+01254A7E: Proc PARSER_DecProc()
+0125DCD1: Proc PARSER_programa()
+0125E5B2: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+0120FDBB: Proc TestSintactico(Nombre:Whole,extensions:Whole,descripcion:Whole,Keywords:Whole,Obligatorio:Whole,fuente:Whole,LineaError1:Whole,LineaError2:Whole,SemanticError:Whole,SubTest:Whole)
+
+TEST SintacticoInstruccionCaseErrorSintacticoExpresion OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoInstruccionCaseChar OBLIGATORIO
+DESCRIPCION: Verifica el funcionamiento básico de la instruccion case con char
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure casos(c:Character) {
+/*  2*/        case c of {
+/*  3*/        'a': PrintLn "caso a";
+/*  4*/        'b': PrintLn "caso b";
+/*  5*/        else PrintLn "no caso";
+/*  6*/        }
+/*  7*/    }
+/*  8*/    procedure main()
+/*  9*/    {
+/* 10*/        casos('a');
+/* 11*/        casos('b');
+/* 12*/        casos('c');
+/* 13*/    }
+/* 14*/    
+--------------------------------------------------------
+Analitzant SintacticoInstruccionCaseChar
+TEST SintacticoInstruccionCaseChar OK 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+================================================================================
+RESUMEN OBLIGATORIO ============================================================
+================================================================================
+
+NOTAS NO VALIDAS POR RESTRINGIR LOS TEST A PROBAR
+
+Resultados sintactico ----------------------------------------------------------
+Test sintactico obligatorio OK............: 53 (100%) CORRECTO
+Test sintactico adicional OK..............: 7 (77.7778%)
+NOTA SINTACTICO...........................: 8.88889
+
+

@@ -28,7 +28,7 @@ SetOpcionesInformes(
     VerObligatorio=>true,
     VerAdicional=>true,
     VerCorrecto=>true,
-	VerExtensions=>unbound
+	VerExtensions=> unbound
 ); 
 
 // GRAMATICA ===================================================================
@@ -209,13 +209,17 @@ Proc Compila(FileName:String,St=Unbound,VeureCodiGenerat=false,VeureCodiExecucio
         Exit ";"
         |
 		// for else CREADO POR MI ----------------------------------------------
-		for "(" [ <Expressio> ] ";" [ <Expressio> ] ";" [ <Expressio> ] ")" <instruccio> [ else <instruccio> ]
+		for "(" [ (<Expressio> | <DecVar> ) ] ";" [ <Expressio> ] ";" [ <Expressio> ] ")" <instruccio> [ else <instruccio> ]
 		|
 		// case CREADO POR MI --------------------------------------------------
-		case <ExpArit> of "{"
+		/*case <ExpArit> of "{"
 			<factor> ":" ( "{" { <instruccio> } "}" | <instruccio> | ";" )
 			{ <factor> ":" ( "{" { <instruccio> } "}" | <instruccio> | ";" ) }
 			[ else <instruccio> ]
+		"}"*/
+		case <Expressio> of "{"
+			{ <factor>: [ <instruccio> ] }
+			[ else [ <instruccio> ] ]
 		"}"
 		|
         // delete --------------------------------------------------------------

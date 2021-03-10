@@ -23,11 +23,19 @@ function factorial(n:integer):integer
 {
     if n<=0 then return 1;
     else return n*factorial(n-1);
+	
+	
 }
 procedure main()
 {
     print "Factorial de ",0," es ",factorial(0),"\\n";
     print "Factorial de ",5," es ",factorial(5),"\\n";
+	i=0;
+	case i of {
+		0:
+		1:
+		2: print "Hola";
+		}
 }    
 \}"),true,false);
 

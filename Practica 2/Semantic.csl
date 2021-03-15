@@ -42,7 +42,10 @@ SetOpcionesInformes(
     VerGenCod=>false,
     VerObligatorio=>true,
     VerAdicional=>true,
-    VerCorrecto=>false
+    VerCorrecto=>false,
+	VerExtensions=>["DeclaracionVariableAuto", "VarInitSimple", "DeclaracionMultiplesVariablesMismoTipo", "DeclaracionMultiplesVariablesDiferenteTipo"]
+	//VerExtensions=>["InstruccionForElse", "InstruccionBreak", "InstruccionContinue"]
+	//VerExtensions=>unbound
 ); 
 
 // =============================================================================

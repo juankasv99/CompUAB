@@ -42,7 +42,10 @@ SetOpcionesInformes(
     VerGenCod=>false,
     VerObligatorio=>true,
     VerAdicional=>true,
-    VerCorrecto=>false
+    VerCorrecto=>false,
+	VerExtensions=>["DeclaracionVariableAuto", "DeclaracionMultiplesVariablesMismoTipo"]
+	//VerExtensions=>["InstruccionForElse", "InstruccionBreak", "InstruccionContinue"]
+	//VerExtensions=>unbound
 ); 
 
 // =============================================================================
@@ -341,13 +344,31 @@ Proc Compila(FileName:String,St=Unbound,VeureCodiGenerat=false,VeureCodiExecucio
 
    // <DecVar> =================================================================
    
-    Rule <DecVar>::= @var nom,t;
-        Var identificador#(nom)
+    Rule <DecVar>::= @var nom,t,dvRes=DescriptorValor();
+        identificador#(nom)
         @TS.ComprovarDuplicat(nom);
-        : <tipus(t,Unbound)> 
+        //: <tipus(t,Unbound)> 
         @var DescriptorsParametres=[];
-        [<parametres(DescriptorsParametres)>]
-        @t.ComprovarConstruible(DescriptorsParametres);
+		(
+			: <tipus(t,Unbound)>
+			[
+				<parametres(DescriptorsParametres)>
+				@t.ComprovarConstruible(DescriptorsParametres);
+			]
+			[ "="
+			@dvRes.tipus = t;
+			<InitVar(dvRes)>
+			
+			@if(!TipusPertany(dvRes.tipus,t)) throw SemanticError("Els tipus no concorden");
+			]
+		|
+			[
+			"=" <InitVar(dvRes)>
+			@t = dvRes.tipus;
+			]
+		)
+        
+        //@t.ComprovarConstruible(DescriptorsParametres);
         @TS.Insertar(ETSVariable(nom,t));
         ";"
 

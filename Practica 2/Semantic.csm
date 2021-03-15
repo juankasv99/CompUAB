@@ -1,0 +1,1392 @@
+// =============================================================================
+// SEMANTIC COMPILADORS I ======================================================
+// =============================================================================
+
+use com
+
+// =============================================================================
+// Tipus de dades ==============================================================
+// =============================================================================
+
+Type [public,Print=Contents] TArray(Mida,TipusElements)
+Type [public] TApuntador(TipusBase)
+Type [public] TClasse(Base,Membres)
+
+Type [public] TipusDeDades=
+    TVoid | TInt | TReal | TChar | TBool |
+	TArray | TApuntador | TClasse
+
+// =============================================================================
+// Taula de Símbols ============================================================
+// =============================================================================
+
+Type [public] TaulaSimbols(
+        Pila, // Pila de entrades de la taula de símbols (ETS...)
+        Funcio, // Unbound si ámbito global
+        VarSz // Mida del espai de variables locals
+    )
+
+Constructor [public] TaulaSimbols()=>This(
+    Pila=>[],
+    Funcio=>Unbound,
+    VarSz=>Unbound
+    );
+
+Fun [public] ts:TaulaSimbols.NomTipus(t);
+
+Var [public] TS=TaulaSimbols(); // Taula de símbols
+
+// =============================================================================    
+// Separadors ==================================================================
+// =============================================================================    
+
+Type [public] TSSeparador(); // Separador d'àmbits
+
+Type [public] TSSeparadorFuncio(Classe,Funcio,VarSz) from TSSeparador; // Separador d'àmbits de funció y mètode
+
+Type [public,Print=Contents] TSSeparadorBucle(
+        Repetir, // Etiqueta per repetir el bucle
+        Sortida // Etiqueta a la sortida del bucle
+    ) from TSSeparador;
+
+// =============================================================================
+// Entrades taule de símbols ===================================================
+// =============================================================================
+
+Type [public,Print=Contents] EntradaTaulaSimbols(
+        nom // nom del símbol
+    )
+
+Type [public,Print=Contents] ETSVariable(
+        Tipus, // tipus de la variable
+        PermisLectura, // Es pot llegir el valor de la variable
+        PermisEscriptura, // Es pot escriura la variable
+        Posicio // Posibles valors
+                // etiqueta: variable global
+                // int: variable local
+                // DespCamp(desp)
+                // RefParametre(desp)
+                
+    ) from EntradaTaulaSimbols
+
+Type [public,Print=Contents] ETSConstant(
+        Tipus, // tipus de la variable
+        Valor  // Valor de la constant   
+    ) from EntradaTaulaSimbols
+
+Type [public,Print=Contents] ETSFuncio(
+        TipusFuncio,// TFFuncion,TFProcediment,TFConstructor,TFDestructor
+        Classe,     // classe del mètodo 
+        Parametres, // Llista de paràmetres
+        TipusRetorn,// tipus del valor de retorn (resultat de la funció o
+                    // void per procediment)
+        DespRetorn, // Desplaçament del valor de retorn en el bloc d'activació
+        Posicio,    // etiqueta que apunta al inicio del código de la función
+        TeCos       // La funció ja te un cos o no
+    ) from EntradaTaulaSimbols
+
+Type [public] EnumTipusFuncion=TFFuncio | TFProcediment | TFConstructor | TFDestructor
+
+Type [public,Print=Contents] Parametre(
+    Nom, // Nom del paràmetre
+    Tipus, // Tipus del paràmetre
+    Referencia, // Pas per referencia=true per valor=false
+    ParametreIn, // Paràmetre d'entrada (es pot llegir)
+    ParametreOut // Paràmetre de sortida (es pot escrire)
+    );
+    
+
+Type [public] ETSTipus(
+        Tipus // Descriptor del tipus de dades
+    ) from EntradaTaulaSimbols
+    
+Type [public,Print=Contents] ETSBlock(
+        Sortida // Etiqueta a la sortida del bloc
+    ) from EntradaTaulaSimbols;
+
+	
+
+Constructor [public] Parametre(nom:String,tipus,referencia:bool,ParametreIn:bool=false,ParametreOut:bool=false)=> this(nom,tipus,referencia,ParametreIn,ParametreOut);
+
+Constructor [public] EntradaTaulaSimbols(nom:String)=>This(nom)
+
+Constructor [public] ETSVariable(nom:String,t,PermisLectura:Bool=true,PermisEscriptura:Bool=true,pos=unbound) from EntradaTaulaSimbols(nom) =>
+    This(t,PermisLectura,PermisEscriptura,pos)
+
+Constructor [public] ETSConstant(nom:String,t:TipusDeDades,valor) from EntradaTaulaSimbols(nom) => This(t,valor)
+
+
+Constructor [public] ETSFuncio(
+    TipusFuncio,nom:String,
+    ClasseBase:TipusDeDades,
+    Parametres:List,
+    TipusRetorn) from EntradaTaulaSimbols(nom) =>
+    This(TipusFuncio,ClasseBase,Parametres,TipusRetorn,unbound,unbound,false)
+
+Constructor [public] ETSTipus(nom:String,t) from EntradaTaulaSimbols(nom) => This(t)
+    
+Constructor [public] ETSBlock(nom:String,sortida) from EntradaTaulaSimbols(nom) => This(sortida)
+
+//Constructor [public] TSSeparadorBucle(repetir=unbound,sortida=unbound) => This(repetir,sortida)
+
+// =============================================================================
+// Tipus de dades ==============================================================
+// =============================================================================
+
+// Constructors de tipus de dades ==============================================
+
+Constructor [public] TArray(Mida,TipusElements)=>This(Mida,TipusElements)
+Constructor [public] TApuntador(TipusBase)=>This(TipusBase)
+Constructor [public] TClasse(Base)=>This(base,[])
+
+// MidaTipus ===================================================================
+
+Fun [public] t:TipusDeDades.MidaTipus()=>
+{
+    switch (t)
+    {
+        TVoid => 0;
+        TInt => 4;
+        TReal => 8;
+        TChar => 1;
+        TBool => 4;
+        TArray => 
+            if (typeP(int,t.Mida)) t.Mida*t.TipusElements.MidaTipus();
+            else (t.Mida[1]-t.Mida[0]+1)*t.TipusElements.MidaTipus();
+        TApuntador => 4;
+        TClasse => foldl(\+,[if (TypeP(ETSVariable,ets)) ets.Tipus.MidaTipus() else 0 | ets<-t.Membres])+ t.Base.MidaTipus();
+    }
+}
+
+// TipusSimpleP ===========================================================
+
+Fun [public] t:TipusDeDades.TipusSimpleP()=>
+{
+    switch (t) {
+        TClasse=> false;
+        TArray=> false;
+        TInt | TReal | TChar | TBool | TApuntador | TVoid => true;
+    }
+}
+
+// NombreDeElements ============================================================
+// Calcula el nombre de elements que forman un tipus de dades
+// 1 per tipus simples
+// 1 per classes
+// n per arrays
+
+Fun [public] t:TipusDeDades.NombreDeElements()=>
+{
+    switch (t)
+    {
+        TVoid => 0;
+        TArray => (if (TypeP(int,t.Mida)) t.Mida else t.Mida[1]-t.Mida[0]+1)*t.TipusElements.NombreDeElements();
+        Others => 1;
+    }
+}
+
+// TipusDelsElements ============================================================
+// Dona el tipus de dades dels elements d'un array
+// si no es array dona el mateix tipus de dades
+
+Fun [public] t:TipusDeDades.TipusDelsElements()=>
+{
+    switch (t)
+    {
+        TArray => t.TipusElements.TipusDelsElements();
+        Others=> t;        
+    }
+}
+
+// Constructors ================================================================
+
+Fun [public] t:TipusDeDades.Constructors()=>
+{
+    switch (t)
+    {
+        TVoid => [];
+        TInt => [];
+        TReal => [];
+        TChar => [];
+        TBool => [];
+        TApuntador => [];
+        TArray => t.TipusElements.Constructors();
+        TClasse => [ets|ets<-t.Membres, TypeP(ETSFuncio,ets), ets.TipusFuncio=:=TFConstructor];
+    }
+}
+
+// ConstructorPerDefecte =========================================================
+
+Fun [public] t:TipusDeDades.ConstructorPerDefecte()=>
+{
+    switch (t)
+    {
+        TVoid => unbound;
+        TInt => unbound;
+        TReal => unbound;
+        TChar => unbound;
+        TBool => unbound;
+        TApuntador => unbound;
+        TArray => t.TipusElements.ConstructorPerDefecte();
+        TClasse => {
+            Var l=t.Constructors();
+            if (l=:=[]) {
+                // Mirar si la classe base es pot construir per defecte
+                void t.Base.ConstructorPerDefecte();
+                // Mirar si els camps es poden construir per defecte
+                for (ets<-t.Membres,TypeP(ETSVariable,ets)) void ets.Tipus.ConstructorPerDefecte();
+                unbound
+            };
+            else {
+                Search (ets<-l, ets.Parametres==[]) ets
+                else throw SemanticError("No es pot construir per defecte el tipus de dades ", TS.NomTipus(t));
+            }
+        }
+    }
+}
+
+// ConstructorPerDefecteDefinitP ===============================================
+
+Fun [public] t:TipusDeDades.ConstructorPerDefecteDefinitP()=>
+{
+    switch (t)
+    {
+        TVoid => false;
+        TInt => false;
+        TReal => false;
+        TChar => false;
+        TBool => false;
+        TApuntador => false;
+        TArray => t.TipusElements.ConstructorPerDefecteDefinitP();
+        TClasse => {
+            -](ets<-t.Membres, 
+                TypeP(ETSFuncio,ets), 
+                ets.TipusFuncio=:=TFConstructor,
+                ets.Parametres.Length==0)
+        }
+    }
+}
+
+// ComprovarConstruiblePerDefecte =========================================================
+
+Proc [public] t:TipusDeDades.ComprovarConstruiblePerDefecte()=> void t.ConstructorPerDefecte();
+
+// ConstructorPerCopia =========================================================
+
+Fun [public] t:TipusDeDades.ConstructorPerCopia()=>
+{
+    switch (t)
+    {
+        TVoid => unbound;
+        TInt => unbound;
+        TReal => unbound;
+        TChar => unbound;
+        TBool => unbound;
+        TApuntador => unbound;
+        TArray => t.TipusElements.ConstructorPerCopia();
+        TClasse => {
+            Var l=t.Constructors();
+            if (l=:=[]) {
+                // Mirar si la classe base es pot construir per copia
+                void t.Base.ConstructorPerCopia();
+                // Mirar si els camps es poden construir per copia
+                for (ets<-t.Membres,TypeP(ETSVariable,ets)) void ets.Tipus.ConstructorPerCopia();
+                unbound
+            }
+            else {
+                Search (ets<-l, 
+                ets.Parametres.Length==1,
+                ets.Parametres.Head.Referencia,
+                ets.Parametres.Head.Tipus=:=t) ets
+                else throw SemanticError("No es pot construir per copia el tipus de dades ", TS.NomTipus(t));
+            }
+        }
+    }
+}
+
+// ConstructorPerCopiaDefinitP ===============================================
+
+Fun [public] t:TipusDeDades.ConstructorPerCopiaDefinitP()=>
+{
+    switch (t)
+    {
+        TVoid => false;
+        TInt => false;
+        TReal => false;
+        TChar => false;
+        TBool => false;
+        TApuntador => false;
+        TArray => t.TipusElements.ConstructorPerCopiaDefinitP();
+        TClasse => {
+            -](ets<-t.Membres, 
+                TypeP(ETSFuncio,ets), 
+                ets.TipusFuncio=:=TFConstructor,
+                ets.Parametres.Length==1,
+                ets.Parametres.Head.Referencia,
+                ets.Parametres.Head.Tipus=:=t)
+        }
+    }
+}
+
+// ComprovarConstruiblePerCopia ================================================
+
+Proc [public] t:TipusDeDades.ComprovarConstruiblePerCopia()=> void t.ConstructorPerCopia();
+
+// Assignador ==================================================================
+
+Fun [public] t:TipusDeDades.Assignador()=>
+{
+    switch (t)
+    {
+        TVoid => unbound;
+        TInt => unbound;
+        TReal => unbound;
+        TChar => unbound;
+        TBool => unbound;
+        TApuntador => unbound;
+        TArray => t.TipusElements.Assignador();
+        TClasse =>    
+            Search (ets<-t.Membres, 
+                TypeP(ETSFuncio,ets), 
+                ets.TipusFuncio=:=TFProcediment,
+                ets.Nom=="operator=",
+                ets.Parametres.Length==1,
+                ets.Parametres.Head.Referencia,
+                ets.Parametres.Head.Tipus=:=t) ets
+           else if (t.Constructors()==[]) {
+                // Mirar si la classe base es pot assignar
+                void t.Base.Assignador();
+                // Mirar si els camps es poden assignar
+                for (ets<-t.Membres,TypeP(ETSVariable,ets)) void ets.Tipus.Assignador();
+                unbound
+            }
+           else throw SemanticError("No es pot assignar el tipus de dades ", TS.NomTipus(t));
+    }
+}
+
+// AssignadorDefinitP ==================================================================
+
+Fun [public] t:TipusDeDades.AssignadorDefinitP()=>
+{
+    switch (t)
+    {
+        TVoid => false;
+        TInt => false;
+        TReal => false;
+        TChar => false;
+        TBool => false;
+        TApuntador => false;
+        TArray => t.TipusElements.AssignadorDefinitP();
+        TClasse =>    
+            -](ets<-t.Membres, 
+                TypeP(ETSFuncio,ets), 
+                ets.TipusFuncio=:=TFProcediment,
+                ets.Nom=="operator=",
+                ets.Parametres.Length==1,
+                ets.Parametres.Head.Referencia,
+                ets.Parametres.Head.Tipus=:=t)
+    }
+}
+
+// ComprovarAssignable =========================================================
+
+Proc [public] t:TipusDeDades.ComprovarAssignable()=> void  t.Assignador();
+
+// Destructor ==================================================================
+
+Fun [public] t:TipusDeDades.Destructor()=>
+{
+    switch (t)
+    {
+        TVoid => unbound;
+        TInt => unbound;
+        TReal => unbound;
+        TChar => unbound;
+        TBool => unbound;
+        TApuntador => unbound;
+        TArray => t.TipusElements.Destructor();
+        TClasse =>
+            Search (ets<-t.Membres, 
+                TypeP(ETSFuncio,ets),
+                ets.TipusFuncio=:=TFDestructor) ets
+            else if (t.base=:=TVoid) unbound 
+            else t.base.Destructor()
+    }
+}
+
+// TipusIguals =================================================================
+// Tipus de dades iguals per contingut
+
+Fun [public] TipusIguals(t1:TipusDeDades,t2:TipusDeDades,JaComparat=[])=>
+{
+    if (t1=:=t2) return true;
+    if (-](p<-JaComparat,p[0]=:=t1 && p[1]=:=t2)) return true;
+    switch (t1) {
+        TVoid => TVoid=:=t2;
+        TInt => TInt=:=t2;
+        TReal => TReal=:=t2;
+        TChar => TChar=:=t2;
+        TBool => TBool=:=t2;
+        TArray => {
+            if (TypeP(TArray,t2) && t1.Mida==t2.Mida) {
+                TipusIguals(t1.TipusElements,t2.TipusElements,(t1,t2)::JaComparat);
+            }
+            else false;
+        }
+        TApuntador => {
+            if (TypeP(TApuntador,t2)) {
+                if (t1.TipusBase=:=TVoid || t2.TipusBase=:=TVoid) return true;
+                TipusIguals(t1.TipusBase,t2.TipusBase,(t1,t2)::JaComparat);
+            }
+            else false;
+        }
+        TClasse => false;
+    }
+}
+
+// TipusPertany =================================================================
+// t1 pertany al tipus t2 o son iguals
+
+Fun [public] TipusPertany(t1:TipusDeDades,t2:TipusDeDades,JaComparat=[])=>
+{
+    if (t1=:=t2) return true;
+    if (-](p<-JaComparat,p[0]=:=t1 && p[1]=:=t2)) return true;
+    switch (t1) {
+        TVoid => TVoid=:=t2;
+        TInt => TInt=:=t2;
+        TReal => TReal=:=t2;
+        TChar => TChar=:=t2;
+        TBool => TBool=:=t2;
+        TArray => {
+            if (TypeP(TArray,t2) && t1.Mida==t2.Mida) {
+                TipusPertany(t1.TipusElements,t2.TipusElements,(t1,t2)::JaComparat);
+            }
+            else false;
+        }
+        TApuntador => {
+            if (TypeP(TApuntador,t2)) {
+                if (t1.TipusBase=:=TVoid || t2.TipusBase=:=TVoid) return true;
+                TipusPertany(t1.TipusBase,t2.TipusBase,(t1,t2)::JaComparat);
+            }
+            else false;
+        }
+        TClasse => {            
+            if (TypeP(TClasse,t2)) {
+                var base=t1.base;
+                var res=false;
+                while (base!:=TVoid) {
+                    if (base=:=t2) {
+                        res=true;
+                        break;                        
+                    }
+                    base=base.base;
+                }
+                res
+            }
+            else false;
+        }
+    }    
+}
+
+// TipusElementP =================================================================
+// t1 pertany als elements del tipus t2 o son iguals
+
+Fun [public] TipusElementP(t1:TipusDeDades,t2:TipusDeDades)=>
+{
+    if (TipusPertany(t1,t2)) return true;
+    if (TypeP(TArray,t2)) TipusElementP(t1,t2.TipusElements);
+    else return false;
+}
+
+// =============================================================================
+// DescriptorValor =============================================================
+// =============================================================================
+
+// DescriptorValor =============================================================
+// Cuando se puede obtener una referencia:
+// - Si se puede leer y escribir el valor.
+// - int out & Si se puede leer y escribir el valor y tiene dirección.
+// - in & Si se puede leer y tiene dirección.
+// - out & Si se puede escribir y tiene dirección.
+// Generar adreces per a paràmetres que normalment no tinguin adreça
+// Per exemple els resultats de les expressiones.
+
+Type [public] DescriptorValor(
+    Tipus,              // Tipus de dades
+    PermisLectura,      // Es pot llegir el contingut d'aquet valor.
+    PermisEscriptura,   // Es pot escriure en el contingut d'aquet valor
+    Constant            // Valor de la constant. Si no és constant valdrà unbound.
+    );
+
+// DescriptorValor =============================================================
+
+Constructor [public] DescriptorValor()=> This(TVoid,false,false,unbound);
+
+// EsConstant ==================================================================
+
+Fun [public] this:DescriptorValor.EsConstant()=> this.Constant!:=unbound;
+
+
+// SetConstant =================================================================
+
+Proc [public] this:DescriptorValor.SetConstant(cte,tipus:TipusDeDades)=>
+{
+    this.Constant=cte;
+    this.Tipus=tipus;
+    this.PermisLectura=true;
+    this.PermisEscriptura=false;
+}
+
+// SetValue =================================================================
+
+Proc [public] this:DescriptorValor.SetValue(tipus:TipusDeDades, lectura:Bool, escriptura:bool)=>
+{
+    this.Constant=unbound;
+    this.Tipus=tipus;
+    this.PermisLectura=lectura;
+    this.PermisEscriptura=escriptura;
+}
+
+// SetRValue =================================================================
+
+Proc [public] this:DescriptorValor.SetRValue(tipus:TipusDeDades)=>
+{
+    this.Constant=unbound;
+    this.Tipus=tipus;
+    this.PermisLectura=true;
+    this.PermisEscriptura=false;
+}
+
+// SetLValue =================================================================
+
+Proc [public] this:DescriptorValor.SetLValue(tipus:TipusDeDades)=>
+{
+    this.Constant=unbound;
+    this.Tipus=tipus;
+    this.PermisLectura=true;
+    this.PermisEscriptura=true;
+}
+
+// SetPermisos =================================================================
+
+Proc [public] this:DescriptorValor.SetPermisos(lectura:Bool, escriptura:Bool)=>
+{
+    this.Constant=unbound;
+    this.PermisLectura=lectura;
+    this.PermisEscriptura=escriptura;
+}
+
+// AssociarAtributs ============================================================
+
+Proc [public] this:DescriptorValor.AssociarAtributs()=>
+{
+    AssociarAtribut("Tipus=",TS.NomTipus(this.Tipus));
+    AssociarAtribut("Permisos=",if (this.PermisLectura) "Lectura " else "",if (this.PermisEscriptura) "Escriptura" else " ");
+    if (this.Constant!=unbound) AssociarAtribut("Constant=",this.Constant);
+}
+
+// =============================================================================
+// ETSFuncio ===================================================================
+// =============================================================================
+
+// MetodesCompatiblesP =========================================================
+
+Fun [public] MetodesCompatiblesP(m1:ETSFuncio,m2:ETSFuncio)=>
+{
+    if (m1.nom!=m2.nom) return true;
+    switch (m1.TipusFuncio) {
+        TFConstructor => 
+            switch (m2.TipusFuncio) {
+                TFConstructor => {}
+                TFDestructor => return true;
+                TFFuncio => return false;
+                TFProcediment => return false;
+            }
+        TFDestructor => 
+            switch (m2.TipusFuncio) {
+                TFConstructor => return true;
+                TFDestructor => {};
+                TFFuncio => return false;
+                TFProcediment => return false;
+            }
+        TFFuncio | TFProcediment  =>
+            switch (m2.TipusFuncio) {
+                TFConstructor => return false;
+                TFDestructor => return false;
+                TFFuncio | TFProcediment => {}
+            }
+    }
+    if (m1.Parametres.Length!=m2.Parametres.Length) return true;
+    Search (p1<-m1.Parametres,p2<-m2.Parametres,!TipusIguals(p1.Tipus,p2.Tipus)) true
+    else false
+}
+
+// SeleccionarMetode ===========================================================
+
+Fun [public] SeleccionarMetode(etss:List,DescriptorsParametres:List)=>
+{
+    var m=unbound;
+    Search (ets<-etss,
+        ets.Parametres.Length==DescriptorsParametres.Length,
+        !-](p1<-ets.Parametres,p2<-DescriptorsParametres,!TipusIguals(p1.Tipus,p2.Tipus))) m=ets;
+    else {
+        // Selecció aplicant coercions
+        var l=[ets|ets<-etss,
+        ets.Parametres.Length==DescriptorsParametres.Length,
+        !-](p1<-ets.Parametres,p2<-DescriptorsParametres,!TipusPertany(p2.Tipus,p1.Tipus))];
+        if (l=:=[]) throw SemanticError("Error en els paràmetres de la crida");
+        if (l.Length>1) throw SemanticError("Crida ambigua");
+        m=l.head;
+    }
+    m
+}
+
+// =============================================================================
+// Classe com taula de simbols =================================================
+// =============================================================================
+
+// ComprovarDuplicat ===========================================================
+
+// Duplicitat de símbol
+Proc [public] classe:TClasse.ComprovarDuplicat(nom:string)=>
+{
+    if (-](ets<-classe.Membres,ets.nom==nom)) throw SemanticError("declaració duplicada de ",nom);
+}
+
+// Duplicitat de métode
+Proc [public] classe:TClasse.ComprovarDuplicat(metode:ETSFuncio)=>
+{
+    for (ets<-classe.Membres) {
+        if (ets.nom==metode.nom && !(TypeP(ETSFuncio,ets) && MetodesCompatiblesP(ets,metode))) {
+            throw SemanticError("declaració duplicada de ",metode.nom);            
+        }
+    }
+}
+
+// Insertar ====================================================================
+
+Proc [public] classe:TClasse.Insertar(ets:EntradaTaulaSimbols)=>
+{
+    classe.Membres=ets::classe.Membres;
+}
+
+// BuscarCamp ==================================================================
+
+Fun [public] classe:TClasse.BuscarCamp(nom:string)=>
+{
+    for (ets<-classe.membres,ets.nom==nom) {
+        switch (ets) {
+            ETSVariable=> return ets;
+            ETSConstant=> return ets;
+            EntradaTaulaSimbols=> throw SemanticError(nom," no es un camp");
+        }
+    }        
+    if (classe.Base=:=TVoid) throw SemanticError("Camp ", nom," no declarat"); 
+    classe.Base.BuscarCamp(nom);
+}
+
+// BuscarMetode ================================================================
+
+Fun [public] classe:TClasse.BuscarMetode(nom:string)=>
+{
+    var ETSTrobades=[];
+    for (ets<-classe.membres,ets.nom==nom) {
+        switch (ets) {
+            ETSFuncio=> if (ets.TipusFuncio!:=TFDestructor && ets.TipusFuncio!:=TFConstructor) ETSTrobades=ets::ETSTrobades;
+            EntradaTaulaSimbols=> throw SemanticError(nom," no es un mètode");
+        }
+    }        
+    if (!ETSTrobades.EmptyP()) ETSTrobades
+    else if (classe.Base=:=TVoid) throw SemanticError("Mètode ", nom," no declarat"); 
+    else classe.Base.BuscarMetode(nom);
+}
+
+// BuscarPrototipus ===========================================================
+
+Fun [public] classe:TClasse.BuscarPrototipus(metode:ETSFuncio)=>
+{
+    Search (ets<-classe.Membres,
+        TypeP(ETSFuncio,ets),
+        metode.nom==ets.nom,
+        metode.TipusFuncio==ets.TipusFuncio,
+        TipusIguals(metode.TipusRetorn,ets.TipusRetorn),
+        metode.Parametres.Length== ets.Parametres.Length,
+        !-](p1<-metode.Parametres, p2<-ets.Parametres,
+            !TipusIguals(p1.Tipus,p2.Tipus) || p1.Referencia!=p2.Referencia)
+        ) ets
+    else throw SemanticError("Métode ",metode.nom," no trobat en la seva classe");
+}
+
+// =============================================================================
+// Taula de Símbols ============================================================
+// =============================================================================
+
+Fun [public] ts:TaulaSimbols.StringETSFuncio(Ets:ETSFuncio);
+
+// ComprovarDuplicat ===========================================================
+
+// Duplicitat de símbol
+Proc [public] ts:TaulaSimbols.ComprovarDuplicat(nom:string)=>
+{
+    for (ets<-ts.pila) {
+        if (typep(TSSeparador,ets)) break;
+        if (typep(EntradaTaulaSimbols,ets) && ets.nom==nom && !TypeP(ETSBlock,ets)) {
+            throw SemanticError("Declaració duplicada de ",nom);
+        }
+    }
+}
+
+// Duplicitat de métode
+Proc [public] ts:TaulaSimbols.ComprovarDuplicat(metode:ETSFuncio)=>
+{
+    for (ets<-ts.pila) {
+        if (typep(TSSeparador,ets)) break;
+        if (ets.nom==metode.nom 
+            && !(TypeP(ETSFuncio,ets) && MetodesCompatiblesP(ets,metode))
+            && !TypeP(ETSBlock,ets)) {
+            throw SemanticError("declaració duplicada de ",metode.nom);            
+        }
+    }
+}
+
+// =============================================================================
+// Buscar ======================================================================
+// =============================================================================
+
+
+/*
+Búsquedas que hace el compilador
+
+- Variable
+- Tipo de datos
+- Classe
+- Clase (constructor), función, procedimiento
+- método función, método procedimiento (buscar en classe).
+- destructor
+- Prototipo función procedimiento
+- Prototipo método función procedimiento
+- Prototipo constructor
+- Prototipo destructor
+
+*/
+
+Const [public] Global;
+
+// BuscarClasse ================================================================
+
+Fun [public] ts:TaulaSimbols.BuscarClasse(nom:string)=>
+{
+    Search (ets<-ts.Pila, TypeP(EntradaTaulaSimbols,ets),ets.nom==nom) {
+        if (!TypeP(ETSTipus,ets) || !TypeP(TClasse,ets.tipus)) throw SemanticError(nom," no es una classe");
+        ets.Tipus
+    }
+    else throw SemanticError("classe ",nom," no declarada");
+}
+
+// BuscarNivellDeClasse ========================================================
+
+Fun [public] ts:TaulaSimbols.BuscarNivellDeClasse(t:TClasse)=>
+{
+    var nivell=0;
+    proc Buscar(simbols)=>
+    {
+        for (ets<-simbols) {
+            switch (ets) {
+                ETSTipus=> {
+                    if (ets.tipus=:=t) return;
+                }
+                EntradaTaulaSimbols=> { }
+                TSSeparadorFuncio=> {
+                    if (ets.Funcio==Unbound) nivell=Global;
+                    else nivell=nivell+1;
+                }
+                TSSeparador=> {
+                }
+            }
+        }
+        throw Exception("Error intern a BuscarNivellDeClasse ",t);
+    }
+    Buscar(ts.Pila);
+    return nivell;
+}
+
+// Buscar ======================================================================
+
+Fun [public] ts:TaulaSimbols.Buscar(nom:string)=>
+{
+    var nivell=0;
+    var ETSTrobades=[];
+    proc Buscar(simbols)=>
+    {
+        proc BuscarEnClasse(classe)=>
+        {
+            if (classe=:=TVoid) return;
+            Buscar(classe.Membres);
+            if (ETSTrobades.EmptyP()) BuscarEnClasse(classe.base);
+        }
+        for (ets<-simbols) {
+            switch (ets) {
+                EntradaTaulaSimbols=> {
+                    if (ets.nom==nom 
+                        && !(TypeP(ETSFuncio,ets) && (ets.TipusFuncio==TFConstructor || ets.TipusFuncio==TFDestructor)) 
+                        && !TypeP(ETSBlock,ets)) ETSTrobades=ets::ETSTrobades;
+                }
+                TSSeparadorFuncio=> {
+                    if (ETSTrobades.EmptyP()) {
+                        BuscarEnClasse(ets.Classe);
+                        if (!ETSTrobades.EmptyP()) return ;
+                        if (ets.Funcio==Unbound) nivell=Global;
+                        else nivell=nivell+1;
+                    }
+                    else return;
+                }
+                TSSeparador=> {
+                    if (ETSTrobades.EmptyP()) {
+                    }
+                    else return;
+
+                }
+            }
+        }        
+    }
+    Buscar(ts.Pila);
+    if (ETSTrobades.EmptyP()) throw SemanticError(nom," no declarat");
+    return ETSTrobades,nivell;
+}
+
+// BuscarMetodeActiu ===========================================================
+
+Fun [public] ts:TaulaSimbols.BuscarMetodeActiu()=>
+{
+    if (TypeP(ETSFuncio,TS.Funcio) && TS.Funcio.Classe!:=TVoid) return TS.Funcio,0;
+    var nivell=1;
+    for (ets<-TS.Pila,TypeP(TSSeparadorFuncio,ets)) {
+        if (TypeP(ETSFuncio,ets.Funcio) && ets.Funcio.Classe!:=TVoid) return ets.Funcio,nivell;
+        nivell=nivell+1;    
+    }
+    throw SemanticError("This fora de mètode");
+}
+
+// BuscarMetodePerNivell =======================================================
+
+Fun [public] ts:TaulaSimbols.BuscarMetodePerNivell(nivell:Int)=>
+{
+    if (nivell==0) return TS.Funcio;
+    for (sep<-TS,TypeP(TSSeparadorFuncio,sep)) {
+        nivell=nivell-1;
+        if (nivell=:=0) {
+            if (!TypeP(ETSFuncio,sep.Funcio) || sep.Funcio.classe=:=TVoid) throw Exception("Error intern en BuscarMetodePerNivell 1");
+            return sep.Funcio;
+        }
+    }
+    throw Exception("Error intern en BuscarMetodePerNivell 2");
+}
+
+// Nivell ======================================================================
+
+Fun [public] ts:TaulaSimbols.Nivell()=>
+{
+    var nivell=0;
+    for (ets<-ts.pila,typep(TSSeparadorFuncio,ets)) nivell=nivell+1;
+    nivell;
+}
+
+// NomTipus ====================================================================
+
+Fun [public] ts:TaulaSimbols.NomTipus(t)=>
+{
+    switch (t) {
+    TVoid => "Void";
+    TInt => "Integer";
+    TReal => "Real";
+    TChar => "Character";
+    TBool => "Bool";
+    TArray =>
+        Search (ets<-ts.Pila,TypeP(ETSTipus,ets),ets.Tipus=:=t) {
+            ets.nom
+        }
+        else {
+            StrPrint("Array [",
+            if (TypeP(int,t.Mida)) t.Mida else strPrint(t.Mida[0],"..",t.Mida[1]),
+            "] of ",ts.NomTipus(t.TipusElements));
+        }
+    TApuntador =>
+        Search (ets<-ts.Pila,TypeP(ETSTipus,ets),ets.Tipus=:=t) {
+            ets.nom
+        }
+        else {
+            StrPrint("^",ts.NomTipus(t.TipusBase));
+        }
+    TClasse =>
+        Search (ets<-ts.Pila,TypeP(ETSTipus,ets),ets.Tipus=:=t) {
+            ets.nom
+        }
+        else {
+            "Classe no declarada"
+        }
+    Others=> StrPrint("Descriptor de tipus erroni: ", t);
+    }
+}
+
+// NomTipusCurt ====================================================================
+
+Fun [public] ts:TaulaSimbols.NomTipusCurt(t)=>
+{
+    switch (t) {
+    TVoid => "V";
+    TInt => "I";
+    TReal => "R";
+    TChar => "C";
+    TBool => "B";
+    TArray =>
+        Search (ets<-ts.Pila,TypeP(ETSTipus,ets),ets.Tipus=:=t) {
+            ets.nom
+        }
+        else {
+            StrPrint("[",if (TypeP(int,t.Mida)) t.Mida else strPrint(t.Mida[0],"..",t.Mida[1]),"]",ts.NomTipusCurt(t.TipusElements));
+        }
+    TApuntador =>
+        Search (ets<-ts.Pila,TypeP(ETSTipus,ets),ets.Tipus=:=t) {
+            ets.nom
+        }
+        else {
+            StrPrint("^",ts.NomTipusCurt(t.TipusBase));
+        }
+    TClasse =>
+        Search (ets<-ts.Pila,TypeP(ETSTipus,ets),ets.Tipus=:=t) {
+            ets.nom
+        }
+        else {
+            "Classe no declarada"
+        }
+    Others=> StrPrint("Descriptor de tipus erroni: ", t);
+    }
+}
+
+// StringEntrada ===============================================================
+
+Fun [public] ts:TaulaSimbols.StringETSFuncio(Ets:ETSFuncio)=>
+{
+    var out=OutStrStream();
+    proc PrintParametres()=>
+    {   
+        var primero=true;
+        out.Print("(");
+        for (p<-Ets.Parametres) {
+            if (primero) primero=false;
+            else out.Print(", ");
+            if (p.Referencia) out.Print("&");
+            out.Print(p.nom,":",ts.NomTipus(p.Tipus));
+        }
+        out.Print(")");
+    }
+    switch (ets.TipusFuncio) {
+    TFFuncio => {
+        out.Print("FUNCTION ");
+        if (ets.Classe!:=TVoid) out.Print(ts.NomTipus(ets.classe),"::");
+        out.Print(ets.Nom);
+        PrintParametres();
+        out.Print(":",ts.NomTipus(ets.TipusRetorn));        
+    }
+    TFProcediment => {
+        out.Print("PROCEDURE ");
+        if (ets.Classe!:=TVoid) out.Print(ts.NomTipus(ets.classe),"::");
+        out.Print(ets.Nom);
+        PrintParametres();
+    }
+    TFConstructor => {
+        out.Print("CONSTRUCTOR ");
+        out.Print(ets.Nom);
+        PrintParametres();
+    }
+    TFDestructor  => {
+        out.Print("DESTRUCTOR ");
+        out.Print(ets.Nom);
+        PrintParametres();
+    }
+    }
+    out.str();
+}
+
+// NomDecorat ========================================================================
+/*
+Fun [public] ts:TaulaSimbols.Cami(nom:String)=>
+{
+    var Cami=nom;
+    if (TypeP(ETSFuncio,TS.Funcio)) Cami=TS.Funcio.nom++"."++cami;
+    for (ets<-ts.pila,typep(TSSeparadorFuncio,ets), ets.Funcio!=Unbound)
+        Cami=ets.Funcio.nom++"."++Cami;
+    Cami
+}
+*/
+
+Fun [public] ts:TaulaSimbols.NomDecorat(ets:ETSFuncio)=>
+{
+    var Cami="";
+    if (TypeP(ETSFuncio,TS.Funcio)) Cami=TS.Funcio.nom++"."++cami;
+    for (ets<-ts.pila,typep(TSSeparadorFuncio,ets), ets.Funcio!=Unbound)
+        Cami=ets.Funcio.nom++"."++Cami;
+    //if (Cami!="") Cami=Cami++".";
+    if (ets.Classe!:=TVoid) cami=Cami++TS.NomTipus(ets.Classe)++"::";
+    if (ets.TipusFuncio==TFDestructor) Cami=Cami++"~";
+    Cami=Cami++ets.Nom;
+    Cami=Cami++"(";
+    var primer=true;
+    for (p<-ets.Parametres) {
+        if (primer) primer=false;
+        else Cami=Cami++",";
+        if (p.Referencia) Cami=Cami++"&";
+        Cami=Cami++TS.NomTipusCurt(p.Tipus);
+    }
+    Cami=Cami++")";
+    if (ets.TipusFuncio=:=TFFuncio) Cami=Cami++":"++TS.NomTipusCurt(ets.TipusRetorn);
+    Cami
+}
+
+// Insertar ====================================================================
+
+Proc [public] ts:TaulaSimbols.Insertar(ets:EntradaTaulaSimbols)=>
+{
+    ts.Pila=ets::ts.Pila;
+}
+
+// NouAmbit ====================================================================
+
+Proc [public] ts:TaulaSimbols.NouAmbit()=>
+{
+    ts.Pila=TSSeparador()::ts.Pila;
+}
+
+Proc [public] ts:TaulaSimbols.NouAmbit(EtsFun:ETSFuncio)=>
+{
+    ts.Pila=TSSeparadorFuncio(EtsFun.classe,ts.Funcio,ts.VarSz)::ts.Pila;
+    ts.Funcio=EtsFun;
+    ts.VarSz=0;
+}
+
+Proc [public] ts:TaulaSimbols.NouAmbit(classe:TClasse)=>
+{
+    ts.Pila=TSSeparadorFuncio(classe,ts.Funcio,ts.VarSz)::ts.Pila;
+}
+
+// EliminarAmbit ===============================================================
+
+Proc [public] ts:TaulaSimbols.EliminarAmbit()=>
+{
+    Var p=ts.Pila;
+    while (p!:=[] && !TypeP(TSSeparador,p.Head)) {
+        var ets=p.Head;
+        if (TypeP(ETSTipus,ets) && TypeP(TClasse,ets.Tipus)) {
+            // Verificar que totes les funcións tenen cos
+            Search (f<-ets.Tipus.membres,TypeP(ETSFuncio,f),!f.TeCos) {
+                throw SemanticError("Falta cos per ",TS.StringETSFuncio(f));
+            }
+        }
+        p=p.Tail;
+    }
+    if (p=:=[]) {
+        ts.Pila=[];
+        return;
+    }
+    if (TypeP(TSSeparadorFuncio,p.Head)) {
+        ts.Funcio=p.Head.Funcio;
+        ts.VarSz=p.Head.VarSz;
+    }
+    ts.Pila=p.Tail;
+}
+
+// =============================================================================
+// IMPRIMIR TAULA DE SIMBOLS ===================================================
+// =============================================================================
+
+
+// ImprimirTipus ===============================================================
+
+Proc [public] ts:TaulaSimbols.ImprimirTipus(out,t,sangrat,tdef=unbound)=>
+{
+    fun marge()=> {
+        "                                                                    "[..sangrat];
+    }
+    switch (t) {
+    TVoid => out.PrintLn("TVoid");
+    TInt => out.PrintLn("TInteger");
+    TReal => out.PrintLn("TReal");
+    TChar => out.PrintLn("TCharacter");
+    TBool => out.PrintLn("TBool");
+    TArray =>
+        Search (ets<-ts.Pila,TypeP(ETSTipus,ets),ets.Tipus=:=t,tdef!:=ets.Tipus) {
+            out.PrintLn(ets.nom);
+        }
+        else {
+            out.PrintLn();
+            out.Print(marge(),"TArray: Mida=", t.Mida, ", TipusElements=");
+            ts.ImprimirTipus(out,t.TipusElements,sangrat+4,tdef);
+        }
+    TApuntador =>
+        Search (ets<-ts.Pila,TypeP(ETSTipus,ets),ets.Tipus=:=t,tdef!:=ets.Tipus) {
+            out.PrintLn(ets.nom);
+        }
+        else {
+            out.PrintLn();
+            out.Print(marge(),"TApuntador: TipusBase=");
+            ts.ImprimirTipus(out,t.TipusBase,sangrat+4);
+        }
+    TClasse =>
+        Search (ets<-ts.Pila,TypeP(ETSTipus,ets),ets.Tipus=:=t,tdef!:=ets.Tipus) {
+            out.PrintLn(ets.nom);
+        }
+        else {
+            out.PrintLn();
+            out.PrintLn(marge(),"TClasse (",ts.NomTipus(t),"): Base=",
+                if (t.Base=:=TVoid) "TVoid" else ts.NomTipus(t.Base),", Membres=");
+            sangrat=sangrat+4;
+            for (ets<-t.Membres) {
+                switch (ets) {
+                    ETSVariable => {
+                        out.Print(marge(),"ETSVariable: Nom=",ets.Nom,", Posició=",ets.posicio,", Lectura=",ets.PermisLectura,", Escriptura=",ets.PermisEscriptura,", Tipus=");
+                        ts.ImprimirTipus(out,ets.Tipus,8);
+                    }
+                    ETSConstant => {
+                        out.Print(marge(),"ETSConstant: Nom=",ets.Nom,", Valor=",ets.Valor,", Tipus=");
+                        ts.ImprimirTipus(out,ets.Tipus,8);
+                    }
+                    ETSFuncio => {
+                        out.Print(marge(),"ETSFuncio: Nom=",ets.nom,
+                            ", Classe=",ts.NomTipus(ets.Classe),
+                            ", TipusFuncio=",ets.TipusFuncio,
+                            ", TeCos=",ets.TeCos,
+                            ", Posicio=",ets.posicio,
+                            ", DespRetorn=",ets.DespRetorn,
+                            ", TipusRetorn=");
+                            ts.ImprimirTipus(out,ets.TipusRetorn,4);
+                        for (p<-ets.Parametres,i<-1..) {
+							out.Print("    Parametre ",i,": Nom=",p.nom,
+							", Referencia=",p.referencia,", In=",p.ParametreIn,", Out=",p.ParametreOut,
+							", Tipus=");
+                            ts.ImprimirTipus(out,p.tipus,sangrat+8);
+                        }
+                    }
+                    ETSConstant => {
+
+                    }
+                    Others=> out.PrintLn(marge(),"Descriptor de tipus erroni: ", ets);
+                }
+            }
+            
+        }
+    Others=> out.PrintLn("Descriptor de tipus erroni: ", t);
+    }
+}
+
+// Imprimir ====================================================================
+
+Proc [public] ts:TaulaSimbols.Imprimir(out:Stream=cout)=>
+{
+    out.PrintLn();
+    out.PrintLn("=============================================================");
+    out.PrintLn("TAULA DE SIMBOLS ============================================");
+    out.PrintLn("=============================================================");
+
+    for (ets<-reverse(ts.Pila)) {
+        switch (ets) {
+            ETSVariable => {
+                out.Print("ETSVariable: Nom=",ets.Nom,", Posició=",ets.posicio,", Lectura=",ets.PermisLectura,", Escriptura=",ets.PermisEscriptura,", Tipus=");
+                ts.ImprimirTipus(out,ets.Tipus,4);
+            }
+            ETSConstant => {
+                out.Print("ETSConstant: Nom=",ets.Nom,", Valor=",ets.Valor,", Tipus=");
+                ts.ImprimirTipus(out,ets.Tipus,4);
+            }
+            ETSFuncio => {
+                out.Print("ETSFuncio: Nom=",ets.nom,
+                    ", Classe=",ts.NomTipus(ets.Classe),
+                    ", TipusFuncio=",ets.TipusFuncio,
+                    ", TeCos=",ets.TeCos,
+                    ", Posicio=",ets.posicio,
+                    ", DespRetorn=",ets.DespRetorn,
+                    ", TipusRetorn=");
+                    ts.ImprimirTipus(out,ets.TipusRetorn,4);
+                for (p<-ets.Parametres,i<-1..) {
+                    out.Print("    Parametre ",i,": Nom=",p.nom,
+                    ", Referencia=",p.referencia,", In=",p.ParametreIn,", Out=",p.ParametreOut,
+                    ", Tipus=");
+                    ts.ImprimirTipus(out,p.tipus,8);
+                }
+            }
+            ETSTipus =>  {
+                out.Print("ETSTipus: Nom=",ets.Nom,", Descriptor=");
+                ts.ImprimirTipus(out,ets.Tipus,4,ets.Tipus);
+            }
+            ETSBlock=> {
+                out.PrintLn("ETSBlock: Nom=",ets.Nom,", Etiqueta=",ets.Sortida);
+            }
+            TSSeparadorFuncio=> {
+                out.PrintLn("================ TSSeparadorFuncio Classe=",ts.NomTipus(ets.Classe),
+                ", Funció=",if (ets.Funcio==unbound) "unbound" else ets.Funcio.Nom,
+                ", VarSz=",ets.VarSz);
+            }
+            TSSeparadorBucle=> {
+                out.PrintLn("================== TSSeparadorBucle Repetir=",ets.Repetir," Sortida= ",ets.Sortida); 
+			}
+            TSSeparador=>
+                out.PrintLn("================ TSSeparador ======================");
+            Others=> out.PrintLn("Entrada o separador de la TS erroni: ", ets);
+        }
+
+    }
+    out.PrintLn("=============================================================");
+    out.PrintLn("=============================================================");
+    out.PrintLn();
+}
+
+
+// =============================================================================
+// IMPRIMIR TAULA DE SIMBOLS SEMANTIC ==========================================
+// =============================================================================
+
+
+// ImprimirTipus ===============================================================
+
+Proc [public] ts:TaulaSimbols.ImprimirTipusSemantic(out,t,sangrat,tdef=unbound)=>
+{
+    fun marge()=> {
+        "                                                                    "[..sangrat];
+    }
+    switch (t) {
+    TVoid => out.PrintLn("TVoid");
+    TInt => out.PrintLn("TInteger");
+    TReal => out.PrintLn("TReal");
+    TChar => out.PrintLn("TCharacter");
+    TBool => out.PrintLn("TBool");
+    TArray =>
+        Search (ets<-ts.Pila,TypeP(ETSTipus,ets),ets.Tipus=:=t,tdef!:=ets.Tipus) {
+            out.PrintLn(ets.nom);
+        }
+        else {
+            out.PrintLn();
+            out.Print(marge(),"TArray: Mida=", t.Mida, ", TipusElements=");
+            ts.ImprimirTipusSemantic(out,t.TipusElements,sangrat+4,tdef);
+        }
+    TApuntador =>
+        Search (ets<-ts.Pila,TypeP(ETSTipus,ets),ets.Tipus=:=t,tdef!:=ets.Tipus) {
+            out.PrintLn(ets.nom);
+        }
+        else {
+            out.PrintLn();
+            out.Print(marge(),"TApuntador: TipusBase=");
+            ts.ImprimirTipusSemantic(out,t.TipusBase,sangrat+4);
+        }
+    TClasse =>
+        Search (ets<-ts.Pila,TypeP(ETSTipus,ets),ets.Tipus=:=t,tdef!:=ets.Tipus) {
+            out.PrintLn(ets.nom);
+        }
+        else {
+            out.PrintLn();
+            out.PrintLn(marge(),"TClasse (",ts.NomTipus(t),"): Base=",
+                if (t.Base=:=TVoid) "TVoid" else ts.NomTipus(t.Base),", Membres=");
+            sangrat=sangrat+4;
+            for (ets<-t.Membres) {
+                switch (ets) {
+                    ETSVariable => {
+                        out.Print(marge(),"ETSVariable: Nom=",ets.Nom,", Lectura=",ets.PermisLectura,", Escriptura=",ets.PermisEscriptura,", Tipus=");
+                        ts.ImprimirTipusSemantic(out,ets.Tipus,8);
+                    }
+                    ETSConstant => {
+                        out.Print(marge(),"ETSConstant: Nom=",ets.Nom,", Valor=",ets.Valor,", Tipus=");
+                        ts.ImprimirTipusSemantic(out,ets.Tipus,8);
+                    }
+                    ETSFuncio => {
+                        out.Print(marge(),"ETSFuncio: Nom=",ets.nom,
+                            ", Classe=",ts.NomTipus(ets.Classe),
+                            ", TipusFuncio=",ets.TipusFuncio,
+                            ", TeCos=",ets.TeCos,
+                            ", TipusRetorn=");
+                            ts.ImprimirTipusSemantic(out,ets.TipusRetorn,4);
+                        for (p<-ets.Parametres,i<-1..) {
+                            out.Print(marge(),"    Parametre ",i,": Nom=",p.nom,
+                            ", Referencia=",p.referencia,", In=",p.ParametreIn,", Out=",p.ParametreOut,
+                            ", Tipus=");
+                            ts.ImprimirTipusSemantic(out,p.tipus,sangrat+8);
+                        }
+                    }
+                    ETSBlock => {
+                        out.PrintLn(marge(),"ETSBlock: Nom=",ets.Nom);
+                    }
+                    Others=> out.PrintLn(marge(),"Descriptor de tipus erroni: ", ets);
+                }
+            }
+            
+        }
+    Others=> out.PrintLn("Descriptor de tipus erroni: ", t);
+    }
+}
+
+// ImprimirSemantic ====================================================================
+
+Var [public] IgnorarSeparadorDeBucle=true;
+
+Proc [public] ts:TaulaSimbols.ImprimirSemantic(out:Stream=cout)=>
+{
+    out.PrintLn("=============================================================");
+    out.PrintLn("TAULA DE SIMBOLS SEMANTIC ===================================");
+    out.PrintLn("=============================================================");
+
+    for (ets<-reverse(ts.Pila)) {
+        switch (ets) {
+            ETSVariable => {
+                if (ets.Nom[0]!='.') {
+                    out.Print("ETSVariable: Nom=",ets.Nom,", Lectura=",ets.PermisLectura,", Escriptura=",ets.PermisEscriptura,", Tipus=");
+                    ts.ImprimirTipusSemantic(out,ets.Tipus,4);
+                }
+            }
+            ETSConstant => {
+                if (ets.Nom[0]!='.') {
+                    out.Print("ETSConstant: Nom=",ets.Nom,", Valor=",ets.Valor,", Tipus=");
+                    ts.ImprimirTipusSemantic(out,ets.Tipus,4);
+                }
+            }
+            ETSFuncio => {
+                out.Print("ETSFuncio: Nom=",ets.nom,
+                    ", Classe=",ts.NomTipus(ets.Classe),
+                    ", TipusFuncio=",ets.TipusFuncio,
+                    ", TeCos=",ets.TeCos,
+                    ", TipusRetorn=");
+                    ts.ImprimirTipusSemantic(out,ets.TipusRetorn,4);
+                for (p<-ets.Parametres,i<-1..) {
+                    out.Print("    Parametre ",i,": Nom=",p.nom,
+                    ", Referencia=",p.referencia,", In=",p.ParametreIn,", Out=",p.ParametreOut,
+                    ", Tipus=");
+                    ts.ImprimirTipusSemantic(out,p.tipus,8);
+                }
+            }
+            ETSTipus =>  {
+                out.Print("ETSTipus: Nom=",ets.Nom,", Descriptor=");
+                ts.ImprimirTipusSemantic(out,ets.Tipus,4,ets.Tipus);
+            }
+            ETSBlock => {
+                out.PrintLn("ETSBlock: Nom=",ets.Nom);
+            }
+            TSSeparadorFuncio=> {
+                out.PrintLn("================ TSSeparadorFuncio Classe=",ts.NomTipus(ets.Classe),
+                ", Funció=",if (ets.Funcio==unbound) "unbound" else ets.Funcio.Nom);
+            }
+            TSSeparadorBucle=>
+				if (IgnorarSeparadorDeBucle) {}
+                else out.PrintLn("================== TSSeparadorBucle ========================");
+            TSSeparador=>
+                out.PrintLn("================ TSSeparador ======================");
+            Others=> out.PrintLn("Entrada o separador de la TS erroni: ", ets);
+        }
+
+    }
+    out.PrintLn("=============================================================");
+    out.PrintLn("=============================================================");
+    out.PrintLn();
+}
+
+// =============================================================================
+// VARIABLES DE ANALISIS SEMANTICO =============================================
+// =============================================================================
+
+Var [public] SortidaSemantic=OutStrStream();
+

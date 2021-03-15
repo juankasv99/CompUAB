@@ -1,0 +1,321 @@
+// =============================================================================
+// ANALITZADOR SINTACTIC DE LOOS ===============================================
+// =============================================================================
+
+use COM
+use semantic
+use GenCod
+use queue
+
+// =============================================================================
+// Identificació dels alumnes del grup =========================================
+// =============================================================================
+
+SetComponentsGrup([
+	// ("nom","cognoms","NIU","e-mail")
+	("nom","cognoms","0000000","0000000@uab.cat")
+])
+
+
+// =============================================================================
+// Opciones Informes ===========================================================
+// =============================================================================
+
+SetOpcionesInformes(
+    VerSintactico=>true,
+    VerSemantico=>false,
+    VerGenCod=>false,
+    VerObligatorio=>true,
+    VerAdicional=>true,
+    VerCorrecto=>true,
+	VerExtensions=>unbound
+); 
+
+// GRAMATICA ===================================================================
+
+Proc Compila(FileName:String,St=Unbound,VeureCodiGenerat=false,VeureCodiExecucio=false)=>
+{
+    ParserErrorNLin=Unbound;
+    ParserErrorLine=Unbound;
+    ParserErrorNCol=Unbound;
+    ParserErrorException=unbound;
+    Var OldScanInput=ScanInput;
+    if (TypeP(stream,St)) ScanInput=St;
+    else ScanInput=Open(FileName,SMIn,[],SourcePaths);
+    cout.PrintLN("--------------------------------------------------------");
+    cout.PrintLN("Analitzant ",FileName);
+    cout.flush();
+    Var Oldline=system$CSLGetScanLineNumber();
+    Var OldNLin=system$CSLGetParserLineNumber();
+    system$CSLSetScanLineNumber(1);
+    SortidaSemantic=OutStrStream();
+    TRY {
+    BNF_PARSER <programa>
+    TERMINALS
+        + - * / identificador numero caracter string ( ) =
+        == != > < >= <= ^
+        ! && ||
+        , ; : . & "::"
+        Type var Function Procedure constructor destructor
+        Integer Real Character bool class array of "[" "]" "{" "}"
+        if then else while do return
+        Print PrintLn Exit
+        delete new
+        true false null this operator
+        IMPRIMIR_TAULA_DE_SIMBOLS
+    BNF
+    // <Programa> ==============================================================
+    Rule <programa>::=
+        {
+            <DecFun>
+            | <DecProc>
+            | <DecConstructor>
+            | <DecDestructor>
+            | <DecVar>
+            | <DecTipus>
+            | <DecClasse>
+            | IMPRIMIR_TAULA_DE_SIMBOLS ";" 
+        }
+        
+
+    // <DecTipus> ==============================================================
+    Rule <DecTipus>::= "Type" identificador= <tipus> ";"
+        
+    // <Tipus> =================================================================
+    Rule <tipus>::=
+        Integer
+        | Real
+        | Character
+        | Bool
+        | ^ <tipus>
+        | Array "[" numero "]" of <tipus>
+        | identificador
+
+    // <DecClasse> =============================================================
+    Rule <DecClasse>::=      
+        "Class" Identificador [":" Identificador ]
+        "{" { <ElementClasse> } "}"
+
+    // <ElementClasse> =========================================================
+    Rule <ElementClasse>::= 
+        // Camp ----------------------------------------------------------------
+        identificador : <tipus> ";" 
+        |
+        // Funcio --------------------------------------------------------------
+        <PrototipusFuncio> ";"
+        |
+        // Procedure -----------------------------------------------------------
+        <PrototipusProcediment> ";"
+        | 
+        // Constructor ---------------------------------------------------------
+        <PrototipusConstructor> ";"
+        |
+        // Destructor ----------------------------------------------------------
+        <PrototipusDestructor> ";"
+
+    // <PrototipusFuncio> ======================================================
+    Rule <PrototipusFuncio>::= 
+        function identificador ["::" identificador ]
+        <DecParametres> ":" <Tipus>
+        
+    // <PrototipusProcediment> =================================================
+    Rule <PrototipusProcediment>::= 
+        procedure (
+                identificador ["::"( identificador | operator =)] |
+                operator = 
+            ) <DecParametres>
+                
+    // <PrototipusConstructor> =================================================
+    Rule <PrototipusConstructor>::= 
+        Constructor identificador <DecParametres>
+
+    // <PrototipusDestructor> ==================================================
+    Rule <PrototipusDestructor>::= 
+        Destructor identificador "(" ")"
+        
+    // <DecParametres> =========================================================
+    Rule <DecParametres>::=
+            "(" [ <DecParametre> { , <DecParametre> } ]")"
+
+    // <DecParametre> ==========================================================
+    Rule <DecParametre>::=
+            [ & ] identificador : <tipus>
+
+    // <DecVar> =================================================================   
+    Rule <DecVar>::= 
+            Var identificador : <tipus> [ <parametres> ] ";"
+            
+    // <DecFun> ================================================================
+    Rule <DecFun>::= 
+        <PrototipusFuncio>         
+        <bloc>
+
+    // <DecProc> ===============================================================
+    Rule <DecProc>::=
+        <PrototipusProcediment>         
+        <bloc>
+        
+    // <DecConstructor> ========================================================
+    Rule <DecConstructor>::= 
+        <PrototipusConstructor>         
+        <bloc>
+    
+    // <DecDestructor> =========================================================
+    Rule <DecDestructor>::=
+        <PrototipusDestructor>         
+        <bloc>
+
+    // <bloc> ==================================================================
+    Rule <bloc>::= 
+    "{"
+        {
+            <DecFun>
+            | <DecProc>
+            | <DecVar>
+            | <instruccio>
+        }
+    "}"
+
+    // <instruccio> ============================================================
+    Rule <instruccio>::=
+        // Expressió -----------------------------------------------------------
+        <Expressio> ";" 
+        |
+        // return --------------------------------------------------------------
+        return [ <Expressio> ] ";"
+        |
+        // if ------------------------------------------------------------------
+        if <Expressio> then <instruccio> [ else <instruccio> ]
+        |
+        // while ---------------------------------------------------------------
+        while <Expressio> do <instruccio>
+        |
+        // Print ---------------------------------------------------------------
+        (Print | PrintLn) <Expressio> { ,<Expressio> } ";"
+        | 
+        // Exit ----------------------------------------------------------------
+        Exit ";"
+        | 
+        // delete --------------------------------------------------------------
+        delete <expressio> ";"
+        |
+        // block { ...} --------------------------------------------------------
+        <Bloc>
+        |
+        // ; -------------------------------------------------------------------
+        ";"
+        |
+        // Imprimir taula de símbols -------------------------------------------
+        IMPRIMIR_TAULA_DE_SIMBOLS ";" 
+
+    // <Expressio> =============================================================
+    Rule <Expressio>::=
+        <TerBool> { "||" <TerBool> }
+
+    // <TerBool> ===============================================================
+    Rule <TerBool>::=
+        <FacBool> { && <FacBool> }
+        
+    // <FacBool> ===============================================================
+    Rule <FacBool>::=
+        <ExpArit> [ ( == | != | ">" | "<" | >= | <= ) <ExpArit> ]
+
+    // <ExpArit> ===============================================================
+    Rule <ExpArit>::= <terme> { + <terme> | - <terme> }
+
+    // <Terme> =================================================================
+    Rule <terme>::=
+        <factor> {
+            * <factor>
+            | / <factor>
+        }
+
+    // <Factor> ================================================================
+    Rule <factor>::=
+        // ! -------------------------------------------------------------------
+        ! <factor>
+        | 
+        // - -------------------------------------------------------------------
+        - <factor>
+        | 
+        // & -------------------------------------------------------------------
+        & <factor>
+        |
+        // ( expressió ) ------------------------------------------------------
+        "(" <Expressio> ")"
+        
+        |
+        // Numero -------------------------------------------------------------
+        Numero
+        |
+        // Caracter ------------------------------------------------------------
+        Caracter
+        |
+        // String --------------------------------------------------------------
+        String
+        |
+        // true ----------------------------------------------------------------
+        true
+        |
+        // false ---------------------------------------------------------------
+        false
+        |
+        // Null ----------------------------------------------------------------
+        Null
+        |
+        // new -----------------------------------------------------------------
+        "new" <tipus> [<parametres>]
+        |        
+        // this/Identificador -------------------------------------------------------
+        ( this | Identificador [ <Parametres> ] ) <Acces> [ = <expressio> ]
+        
+    // <Acces> =================================================================    
+    Rule <Acces>::= 
+        {
+            <AccesIndex>      |
+            <AccesCampMetode> |
+            <AccesApuntador>
+        }
+        
+    // <AccesIndex> =============================================================
+    Rule <AccesIndex>::= 
+        "[" <Expressio> "]"
+
+    // <AccesCampMetode> =======================================================
+    Rule <AccesCampMetode>::= 
+        . identificador [ <parametres> ]
+
+    // <AccesApuntador> =======================================================
+    Rule <AccesApuntador>::= ^
+
+    // <Parametres> ============================================================
+    Rule <parametres>::=
+        "(" [ <Expressio> { , <Expressio> } ] ")"
+        
+    // =========================================================================
+    END;    
+    }
+    CATCH (ex) {
+        ParserErrorNLin=CSLGetScanLineNumber();
+        ParserErrorLine=system$CSLScanLine();
+        ParserErrorNCol=system$CSLGetScanCharNumber();
+        ParserErrorException=ex;
+        COut.PrintLn("Error a la linea ",ParserErrorNLin,
+                     " del fitxer ",FileName);
+        COut.PrintLn(ParserErrorLine);
+        for (i<-0 .. min(ParserErrorNCol-1,ParserErrorLine.Length-1))
+            COut.Print(if (ParserErrorLine[i]=:='\t') '\t'
+                       else ' ');
+        COut.PrintLN("^ ",ex.What);
+        COut.PrintLN(FmtPretty,ex.BackTrace);
+        system$CSLSetParserLineNumber(OldNLin);
+        system$CSLSetScanLineNumber(Oldline);
+        if (!TypeP(Stream,ST)) Close(ScanInput);
+        ScanInput=OldScanInput;
+        return;
+    };
+    system$CSLSetParserLineNumber(OldNLin);
+    system$CSLSetScanLineNumber(Oldline);
+    if (!TypeP(Stream,ST)) Close(ScanInput);
+    ScanInput=OldScanInput;
+}

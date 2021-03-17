@@ -1,0 +1,484 @@
+================================================================================
+INFORME OBLIGATORIO DE CORRECCION DE LA PRACTICA ===============================
+================================================================================
+Alumno.....: (Juan Carlos,Soriano Valle,1493037,0000000@uab.cat)
+Nombre.....: Juan Carlos
+Apellidos..: Soriano Valle
+NIA........: 1493037
+e-mail.....: 0000000@uab.cat
+
+-------------------------------------------------------------------------
+
+Fichero........: c:\tfg\Compiladors2021\Practicas\Analisi Semantica\1493037\Semantic.csl
+NIA Entrega....: 1493037
+Fecha..........: 16/3/2021
+Hora...........: 14:10
+Ampliaciones...: 
+    ArrayMultidimensional DeclaracionMultiplesVariablesMismoTipo
+    DeclaracionVariableAuto InstruccionBreak InstruccionCase InstruccionForElse
+    OperadorBoolBits
+
+Ver test de las ampliaciones...: 
+    DeclaracionMultiplesVariablesMismoTipo DeclaracionVariableAuto
+
+
+################################################################################
+###                  SINTACTICO OBLIGATORIO: TEST QUE FALLAN                 ###
+################################################################################
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoDeclaracionVariableAutoLocal OBLIGATORIO
+DESCRIPCION: Verifica el correcto funcionamiento de la declaración de variables auto (sin tipo de datos)
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        Var a=10;
+/*  4*/        Var b=10.5;
+/*  5*/        var c=true;
+/*  6*/        var d="casa";
+/*  7*/        IMPRIMIR_TAULA_DE_SIMBOLS;
+/*  8*/        PrintLn "a=",a;
+/*  9*/        PrintLn "b=",b;
+/* 10*/        PrintLn "c=",c;
+/* 11*/        PrintLn "d=",d;
+/* 12*/    }
+/* 13*/    
+--------------------------------------------------------
+Analitzant SintacticoDeclaracionVariableAutoLocal
+Error a la linea 3 del fitxer SintacticoDeclaracionVariableAutoLocal
+            Var a=
+                 ^ Error sintàctic: Se esperaba el terminal :
+Call stack:
+009EC609: Constructor BackTrace(n:#Int)
+009E83EF: Constructor Exception(Args...)
+009D870F: Constructor SyntaxError(Args...)
+00A7FCB0: Thrower ParserError(Args...)
+012D78EF: Proc PARSER_DecVar()
+012D5BA3: Proc PARSER_bloc()
+012D6BA0: Proc PARSER_DecProc()
+012E21AB: Proc PARSER_programa()
+012E2CFA: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+00AA2CE1: Proc TestSintactico(Nombre:Whole,extensions:Whole,descripcion:Whole,Keywords:Whole,Obligatorio:Whole,fuente:Whole,LineaError1:Whole,LineaError2:Whole,SemanticError:Whole,SubTest:Whole)
+
+TEST SintacticoDeclaracionVariableAutoLocal <<<FALLA>>> 3 (Unbound,Unbound)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoDeclaracionVariableAutoExpresion OBLIGATORIO
+DESCRIPCION: Verifica el correcto funcionamiento de la declaración de variables auto inicializada por expresión
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        Var a=10+5;
+/*  4*/        Var b=30+a;
+/*  5*/        IMPRIMIR_TAULA_DE_SIMBOLS;
+/*  6*/        PrintLn "a=",a;
+/*  7*/        PrintLn "b=",b;
+/*  8*/    }
+/*  9*/    
+--------------------------------------------------------
+Analitzant SintacticoDeclaracionVariableAutoExpresion
+Error a la linea 3 del fitxer SintacticoDeclaracionVariableAutoExpresion
+            Var a=
+                 ^ Error sintàctic: Se esperaba el terminal :
+Call stack:
+009EC609: Constructor BackTrace(n:#Int)
+009E83EF: Constructor Exception(Args...)
+009D870F: Constructor SyntaxError(Args...)
+00A7FCB0: Thrower ParserError(Args...)
+012D78EF: Proc PARSER_DecVar()
+012D5BA3: Proc PARSER_bloc()
+012D6BA0: Proc PARSER_DecProc()
+012E21AB: Proc PARSER_programa()
+012E2CFA: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+00AA2CE1: Proc TestSintactico(Nombre:Whole,extensions:Whole,descripcion:Whole,Keywords:Whole,Obligatorio:Whole,fuente:Whole,LineaError1:Whole,LineaError2:Whole,SemanticError:Whole,SubTest:Whole)
+
+TEST SintacticoDeclaracionVariableAutoExpresion <<<FALLA>>> 3 (Unbound,Unbound)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+################################################################################
+###                   SINTACTICO ADICIONAL: TEST QUE FALLAN                  ###
+################################################################################
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoDeclaracionVariableAutoGlobal OPCIONAL
+DESCRIPCION: Verifica que las declaraciones de variables globales auto se inicializan correctamente
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    Var a=10;
+/*  2*/    Var b=10.5;
+/*  3*/    var c=true;
+/*  4*/    var d="casa";
+/*  5*/    IMPRIMIR_TAULA_DE_SIMBOLS;
+/*  6*/    procedure main()
+/*  7*/    {
+/*  8*/        PrintLn "a=",a;
+/*  9*/        PrintLn "b=",b;
+/* 10*/        PrintLn "c=",c;
+/* 11*/        PrintLn "d=",d;
+/* 12*/    }
+/* 13*/    
+--------------------------------------------------------
+Analitzant SintacticoDeclaracionVariableAutoGlobal
+Error a la linea 1 del fitxer SintacticoDeclaracionVariableAutoGlobal
+        Var a=
+             ^ Error sintàctic: Se esperaba el terminal :
+Call stack:
+009EC609: Constructor BackTrace(n:#Int)
+009E83EF: Constructor Exception(Args...)
+009D870F: Constructor SyntaxError(Args...)
+00A7FCB0: Thrower ParserError(Args...)
+012D78EF: Proc PARSER_DecVar()
+012E2253: Proc PARSER_programa()
+012E2CFA: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+00AA2CE1: Proc TestSintactico(Nombre:Whole,extensions:Whole,descripcion:Whole,Keywords:Whole,Obligatorio:Whole,fuente:Whole,LineaError1:Whole,LineaError2:Whole,SemanticError:Whole,SubTest:Whole)
+00AA5B7D: Proc TestCombinado(Nombre:Whole,extensions:Whole,descripcion:Whole,Keywords:Whole,Obligatorio:Whole,fuente:Whole,Tabla:Whole,IgnorarSeparadorDeBucle:Whole,output:Whole,Code:Whole)
+009D7369: Proc LoadFile(FileName:String)
+
+TEST SintacticoDeclaracionVariableAutoGlobal <<<FALLA>>> 1 (Unbound,Unbound)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoDeclaracionVariableAutoGlobalExpresion OPCIONAL
+DESCRIPCION: Verifica que las declaraciones de variables globales auto se inicializan correctamente
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    Var a=10;
+/*  2*/    Var b=10.5+a;
+/*  3*/    var c= a==b;
+/*  4*/    var d="casa";
+/*  5*/    IMPRIMIR_TAULA_DE_SIMBOLS;
+/*  6*/    procedure main()
+/*  7*/    {
+/*  8*/        PrintLn "a=",a;
+/*  9*/        PrintLn "b=",b;
+/* 10*/        PrintLn "c=",c;
+/* 11*/        PrintLn "d=",d;
+/* 12*/    }
+/* 13*/    
+--------------------------------------------------------
+Analitzant SintacticoDeclaracionVariableAutoGlobalExpresion
+Error a la linea 1 del fitxer SintacticoDeclaracionVariableAutoGlobalExpresion
+        Var a=
+             ^ Error sintàctic: Se esperaba el terminal :
+Call stack:
+009EC609: Constructor BackTrace(n:#Int)
+009E83EF: Constructor Exception(Args...)
+009D870F: Constructor SyntaxError(Args...)
+00A7FCB0: Thrower ParserError(Args...)
+012D78EF: Proc PARSER_DecVar()
+012E2253: Proc PARSER_programa()
+012E2CFA: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+00AA2CE1: Proc TestSintactico(Nombre:Whole,extensions:Whole,descripcion:Whole,Keywords:Whole,Obligatorio:Whole,fuente:Whole,LineaError1:Whole,LineaError2:Whole,SemanticError:Whole,SubTest:Whole)
+00AA5B7D: Proc TestCombinado(Nombre:Whole,extensions:Whole,descripcion:Whole,Keywords:Whole,Obligatorio:Whole,fuente:Whole,Tabla:Whole,IgnorarSeparadorDeBucle:Whole,output:Whole,Code:Whole)
+009D7369: Proc LoadFile(FileName:String)
+
+TEST SintacticoDeclaracionVariableAutoGlobalExpresion <<<FALLA>>> 1 (Unbound,Unbound)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoDeclaracionVariableAutoObjeto1 OPCIONAL
+DESCRIPCION: Verifica el correcto funcionamiento de la declaración de variables auto inicializada por objeto
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/     class MyClass {
+/*  2*/         m_c:integer;
+/*  3*/         Constructor MyClass();
+/*  4*/         Constructor MyClass(&obj:MyClass);
+/*  5*/         Constructor MyClass(v:Integer);
+/*  6*/         Destructor MyClass();
+/*  7*/     }
+/*  8*/     Constructor MyClass()
+/*  9*/     {
+/* 10*/         m_c=128;
+/* 11*/         PrintLn "Construir sin parametros";
+/* 12*/     }
+/* 13*/     Constructor MyClass(&obj:MyClass)
+/* 14*/     {
+/* 15*/         m_c=obj.m_c;
+/* 16*/         PrintLn "Construir por copia ",m_c;
+/* 17*/     }
+/* 18*/     Constructor MyClass(v:Integer)
+/* 19*/     {
+/* 20*/         m_c=v;
+/* 21*/         PrintLn "Construir: ",m_c;
+/* 22*/     }
+/* 23*/     Destructor MyClass()
+/* 24*/     {
+/* 25*/         PrintLn "Destruir: ",m_c;
+/* 26*/         m_c=0;
+/* 27*/     }
+/* 28*/     procedure main()
+/* 29*/     {
+/* 30*/         Var a=MyClass(20);
+/* 31*/         IMPRIMIR_TAULA_DE_SIMBOLS;
+/* 32*/         PrintLn "a.m_c=",a.m_c;
+/* 33*/    }
+/* 34*/    
+--------------------------------------------------------
+Analitzant SintacticoDeclaracionVariableAutoObjeto1
+Error a la linea 30 del fitxer SintacticoDeclaracionVariableAutoObjeto1
+            Var a=
+                 ^ Error sintàctic: Se esperaba el terminal :
+Call stack:
+009EC609: Constructor BackTrace(n:#Int)
+009E83EF: Constructor Exception(Args...)
+009D870F: Constructor SyntaxError(Args...)
+00A7FCB0: Thrower ParserError(Args...)
+012D78EF: Proc PARSER_DecVar()
+012D5BA3: Proc PARSER_bloc()
+012D6BA0: Proc PARSER_DecProc()
+012E21AB: Proc PARSER_programa()
+012E2CFA: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+00AA2CE1: Proc TestSintactico(Nombre:Whole,extensions:Whole,descripcion:Whole,Keywords:Whole,Obligatorio:Whole,fuente:Whole,LineaError1:Whole,LineaError2:Whole,SemanticError:Whole,SubTest:Whole)
+
+TEST SintacticoDeclaracionVariableAutoObjeto1 <<<FALLA>>> 30 (Unbound,Unbound)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoDeclaracionVariableAutoArrayObjetoConstructor OPCIONAL
+DESCRIPCION: Verifica el correcto funcionamiento de la declaración de variables auto inicializada por array de objetos
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/     class MyClass {
+/*  2*/         m_c:integer;
+/*  3*/         Constructor MyClass();
+/*  4*/         Constructor MyClass(&obj:MyClass);
+/*  5*/         Constructor MyClass(v:Integer);
+/*  6*/         Destructor MyClass();
+/*  7*/     }
+/*  8*/     Constructor MyClass()
+/*  9*/     {
+/* 10*/         m_c=128;
+/* 11*/         PrintLn "Construir sin parametros";
+/* 12*/     }
+/* 13*/     Constructor MyClass(&obj:MyClass)
+/* 14*/     {
+/* 15*/         m_c=obj.m_c;
+/* 16*/         PrintLn "Construir por copia ",m_c;
+/* 17*/     }
+/* 18*/     Constructor MyClass(v:Integer)
+/* 19*/     {
+/* 20*/         m_c=v;
+/* 21*/         PrintLn "Construir: ",m_c;
+/* 22*/     }
+/* 23*/     Destructor MyClass()
+/* 24*/     {
+/* 25*/         PrintLn "Destruir: ",m_c;
+/* 26*/         m_c=0;
+/* 27*/     }
+/* 28*/     procedure main()
+/* 29*/     {
+/* 30*/         Var b:Array [3] of MyClass;
+/* 31*/         b[0].m_c=10;
+/* 32*/         b[1].m_c=20;            
+/* 33*/         b[2].m_c=30;
+/* 34*/         Var a=b;
+/* 35*/         IMPRIMIR_TAULA_DE_SIMBOLS;
+/* 36*/         PrintLn "a[0].m_c=",a[0].m_c;
+/* 37*/         PrintLn "a[1].m_c=",a[1].m_c;
+/* 38*/         PrintLn "a[2].m_c=",a[2].m_c;
+/* 39*/    }
+/* 40*/    
+--------------------------------------------------------
+Analitzant SintacticoDeclaracionVariableAutoArrayObjetoConstructor
+Error a la linea 34 del fitxer SintacticoDeclaracionVariableAutoArrayObjetoConstructor
+            Var a=
+                 ^ Error sintàctic: Se esperaba el terminal :
+Call stack:
+009EC609: Constructor BackTrace(n:#Int)
+009E83EF: Constructor Exception(Args...)
+009D870F: Constructor SyntaxError(Args...)
+00A7FCB0: Thrower ParserError(Args...)
+012D78EF: Proc PARSER_DecVar()
+012D5BA3: Proc PARSER_bloc()
+012D6BA0: Proc PARSER_DecProc()
+012E21AB: Proc PARSER_programa()
+012E2CFA: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+00AA2CE1: Proc TestSintactico(Nombre:Whole,extensions:Whole,descripcion:Whole,Keywords:Whole,Obligatorio:Whole,fuente:Whole,LineaError1:Whole,LineaError2:Whole,SemanticError:Whole,SubTest:Whole)
+
+TEST SintacticoDeclaracionVariableAutoArrayObjetoConstructor <<<FALLA>>> 34 (Unbound,Unbound)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoDeclaracionVariableAutoArrayObjetoSinConstructor OPCIONAL
+DESCRIPCION: Verifica el correcto funcionamiento de la declaración de variables auto inicializada por array de objetos
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/     class MyClass {
+/*  2*/         m_c:integer;
+/*  3*/     }
+/*  4*/     procedure main()
+/*  5*/     {
+/*  6*/         Var b:Array [3] of MyClass;
+/*  7*/         b[0].m_c=10;
+/*  8*/         b[1].m_c=20;            
+/*  9*/         b[2].m_c=30;
+/* 10*/         Var a=b;
+/* 11*/         IMPRIMIR_TAULA_DE_SIMBOLS;
+/* 12*/         PrintLn "a[0].m_c=",a[0].m_c;
+/* 13*/         PrintLn "a[1].m_c=",a[1].m_c;
+/* 14*/         PrintLn "a[2].m_c=",a[2].m_c;
+/* 15*/    }
+/* 16*/    
+--------------------------------------------------------
+Analitzant SintacticoDeclaracionVariableAutoArrayObjetoSinConstructor
+Error a la linea 10 del fitxer SintacticoDeclaracionVariableAutoArrayObjetoSinConstructor
+            Var a=
+                 ^ Error sintàctic: Se esperaba el terminal :
+Call stack:
+009EC609: Constructor BackTrace(n:#Int)
+009E83EF: Constructor Exception(Args...)
+009D870F: Constructor SyntaxError(Args...)
+00A7FCB0: Thrower ParserError(Args...)
+012D78EF: Proc PARSER_DecVar()
+012D5BA3: Proc PARSER_bloc()
+012D6BA0: Proc PARSER_DecProc()
+012E21AB: Proc PARSER_programa()
+012E2CFA: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+00AA2CE1: Proc TestSintactico(Nombre:Whole,extensions:Whole,descripcion:Whole,Keywords:Whole,Obligatorio:Whole,fuente:Whole,LineaError1:Whole,LineaError2:Whole,SemanticError:Whole,SubTest:Whole)
+
+TEST SintacticoDeclaracionVariableAutoArrayObjetoSinConstructor <<<FALLA>>> 10 (Unbound,Unbound)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+################################################################################
+###                  SEMANTICO OBLIGATORIO: TEST QUE FALLAN                  ###
+################################################################################
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SEMANTICO SemanticoDeclaracionVariableAutoLocal OBLIGATORIO
+DESCRIPCION: Verifica el correcto funcionamiento de la declaración de variables auto (sin tipo de datos)
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        Var a=10;
+/*  4*/        Var b=10.5;
+/*  5*/        var c=true;
+/*  6*/        var d="casa";
+/*  7*/        IMPRIMIR_TAULA_DE_SIMBOLS;
+/*  8*/        PrintLn "a=",a;
+/*  9*/        PrintLn "b=",b;
+/* 10*/        PrintLn "c=",c;
+/* 11*/        PrintLn "d=",d;
+/* 12*/    }
+/* 13*/    
+--------------------------------------------------------
+Analitzant SemanticoDeclaracionVariableAutoLocal
+Error a la linea 3 del fitxer SemanticoDeclaracionVariableAutoLocal
+            Var a=
+                 ^ Error sintàctic: Se esperaba el terminal :
+Call stack:
+009EC609: Constructor BackTrace(n:#Int)
+009E83EF: Constructor Exception(Args...)
+009D870F: Constructor SyntaxError(Args...)
+00A7FCB0: Thrower ParserError(Args...)
+012D78EF: Proc PARSER_DecVar()
+012D5BA3: Proc PARSER_bloc()
+012D6BA0: Proc PARSER_DecProc()
+012E21AB: Proc PARSER_programa()
+012E2CFA: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+00AA3B8B: Proc TestSemantico(Nombre:Whole,extensions:Whole,descripcion:Whole,Keywords:Whole,Obligatorio:Whole,fuente:Whole,IgnorarSeparadorDeBucle:Whole,Tabla:Whole,LineaError1:Whole,LineaError2:Whole)
+
+Error en la tabla de simbolos:
+Tabla de simbolos correcta: 
+    =============================================================
+    TAULA DE SIMBOLS SEMANTIC ===================================
+    =============================================================
+    ETSFuncio: Nom=main, Classe=Void, TipusFuncio=TFProcediment, TeCos=True, TipusRetorn=TVoid
+    ================ TSSeparadorFuncio Classe=Void, Funció=unbound
+    ================ TSSeparador ======================
+    ETSVariable: Nom=a, Lectura=True, Escriptura=True, Tipus=TInteger
+    ETSVariable: Nom=b, Lectura=True, Escriptura=True, Tipus=TReal
+    ETSVariable: Nom=c, Lectura=True, Escriptura=True, Tipus=TBool
+    ETSVariable: Nom=d, Lectura=True, Escriptura=True, Tipus=
+        TArray: Mida=4, TipusElements=TCharacter
+    =============================================================
+    =============================================================
+    
+Tabla de simbolos practica: 
+    
+TEST SemanticoDeclaracionVariableAutoLocal <<<FALLA>>> 3 (Unbound,Unbound)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SEMANTICO SemanticoDeclaracionVariableAutoExpresion OBLIGATORIO
+DESCRIPCION: Verifica el correcto funcionamiento de la declaración de variables auto inicializada por expresión
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        Var a=10+5;
+/*  4*/        Var b=30+a;
+/*  5*/        IMPRIMIR_TAULA_DE_SIMBOLS;
+/*  6*/        PrintLn "a=",a;
+/*  7*/        PrintLn "b=",b;
+/*  8*/    }
+/*  9*/    
+--------------------------------------------------------
+Analitzant SemanticoDeclaracionVariableAutoExpresion
+Error a la linea 3 del fitxer SemanticoDeclaracionVariableAutoExpresion
+            Var a=
+                 ^ Error sintàctic: Se esperaba el terminal :
+Call stack:
+009EC609: Constructor BackTrace(n:#Int)
+009E83EF: Constructor Exception(Args...)
+009D870F: Constructor SyntaxError(Args...)
+00A7FCB0: Thrower ParserError(Args...)
+012D78EF: Proc PARSER_DecVar()
+012D5BA3: Proc PARSER_bloc()
+012D6BA0: Proc PARSER_DecProc()
+012E21AB: Proc PARSER_programa()
+012E2CFA: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+00AA3B8B: Proc TestSemantico(Nombre:Whole,extensions:Whole,descripcion:Whole,Keywords:Whole,Obligatorio:Whole,fuente:Whole,IgnorarSeparadorDeBucle:Whole,Tabla:Whole,LineaError1:Whole,LineaError2:Whole)
+
+Error en la tabla de simbolos:
+Tabla de simbolos correcta: 
+    =============================================================
+    TAULA DE SIMBOLS SEMANTIC ===================================
+    =============================================================
+    ETSFuncio: Nom=main, Classe=Void, TipusFuncio=TFProcediment, TeCos=True, TipusRetorn=TVoid
+    ================ TSSeparadorFuncio Classe=Void, Funció=unbound
+    ================ TSSeparador ======================
+    ETSVariable: Nom=a, Lectura=True, Escriptura=True, Tipus=TInteger
+    ETSVariable: Nom=b, Lectura=True, Escriptura=True, Tipus=TInteger
+    =============================================================
+    =============================================================
+    
+Tabla de simbolos practica: 
+    
+TEST SemanticoDeclaracionVariableAutoExpresion <<<FALLA>>> 3 (Unbound,Unbound)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+================================================================================
+RESUMEN OBLIGATORIO ============================================================
+================================================================================
+
+NOTAS NO VALIDAS POR RESTRINGIR LOS TEST A PROBAR
+
+Resultados sintactico ----------------------------------------------------------
+Test sintactico obligatorio OK............: 52 (96.2963%) <<<FALLA>>>
+Test sintactico adicional OK..............: 10 (66.6667%)
+NOTA SINTACTICO...........................: 0
+TEST OBLIGATORIOS QUE FALLAN (2):
+    SintacticoDeclaracionVariableAutoLocal
+    SintacticoDeclaracionVariableAutoExpresion
+
+TEST ADICIONALES QUE FALLAN (5):
+    SintacticoDeclaracionVariableAutoGlobal
+    SintacticoDeclaracionVariableAutoGlobalExpresion
+    SintacticoDeclaracionVariableAutoObjeto1
+    SintacticoDeclaracionVariableAutoArrayObjetoConstructor
+    SintacticoDeclaracionVariableAutoArrayObjetoSinConstructor
+
+Resultados semantico -----------------------------------------------------------
+Test semantico obligatorio OK.............: 62 (96.875%) <<<FALLA>>>
+Test semantico adicional OK...............: 7 (43.75%)
+NOTA SEMANTICO............................: 0
+TEST OBLIGATORIOS QUE FALLAN (2):
+    SemanticoDeclaracionVariableAutoLocal
+    SemanticoDeclaracionVariableAutoExpresion
+
+

@@ -12,14 +12,14 @@ e-mail.....: 0000000@uab.cat
 Fichero........: c:\tfg\Compiladors2021\Practicas\Analisi Semantica\1493037\Semantic.csl
 NIA Entrega....: 1493037
 Fecha..........: 16/3/2021
-Hora...........: 14:2
+Hora...........: 14:27
 Ampliaciones...: 
     ArrayMultidimensional DeclaracionMultiplesVariablesMismoTipo
     DeclaracionVariableAuto InstruccionBreak InstruccionCase InstruccionForElse
     OperadorBoolBits
 
 Ver test de las ampliaciones...: 
-    DeclaracionMultiplesVariablesMismoTipo
+    DeclaracionMultiplesVariablesMismoTipo DeclaracionVariableAuto
 
 
 ################################################################################
@@ -29,6 +29,24 @@ Ver test de las ampliaciones...:
 ################################################################################
 ###                   SINTACTICO ADICIONAL: TEST QUE FALLAN                  ###
 ################################################################################
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoDeclaracionVariableAutoErrorSintactico3 OPCIONAL
+DESCRIPCION: Error declaración de variables sin tipo de datos
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        Var a,b=10;
+/*  4*/        PrintLn "a=",a;
+/*  5*/        PrintLn "b=",b;
+/*  6*/        PrintLn "&a-&b=", &a-&b;
+/*  7*/    }
+/*  8*/    
+--------------------------------------------------------
+Analitzant SintacticoDeclaracionVariableAutoErrorSintactico3
+TEST SintacticoDeclaracionVariableAutoErrorSintactico3 <<<FALLA>>> Unbound (3,3)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 ################################################################################
 ###                  SEMANTICO OBLIGATORIO: TEST QUE FALLAN                  ###
@@ -41,14 +59,16 @@ RESUMEN OBLIGATORIO ============================================================
 NOTAS NO VALIDAS POR RESTRINGIR LOS TEST A PROBAR
 
 Resultados sintactico ----------------------------------------------------------
-Test sintactico obligatorio OK............: 52 (100%) CORRECTO
-Test sintactico adicional OK..............: 7 (100%)
-NOTA SINTACTICO...........................: 10
+Test sintactico obligatorio OK............: 54 (100%) CORRECTO
+Test sintactico adicional OK..............: 14 (93.3333%)
+NOTA SINTACTICO...........................: 9.66667
 
+TEST ADICIONALES QUE FALLAN (1):
+    SintacticoDeclaracionVariableAutoErrorSintactico3
 
 Resultados semantico -----------------------------------------------------------
-Test semantico obligatorio OK.............: 62 (100%) CORRECTO
-Test semantico adicional OK...............: 7 (100%)
-NOTA SEMANTICO............................: 10
+Test semantico obligatorio OK.............: 64 (100%) CORRECTO
+Test semantico adicional OK...............: 14 (87.5%)
+NOTA SEMANTICO............................: 9.375
 
 

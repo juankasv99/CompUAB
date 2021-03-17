@@ -1,0 +1,30 @@
+		/*Rule <DecVar>::= @var nom,t;
+        Var identificador#(nom)
+        @TS.ComprovarDuplicat(nom);
+        @var moreVariables=[];
+		{
+			@var moreNom;
+			"," identificador#(moreNom)
+			@moreVariables=moreNom::moreVariables;
+		
+		}
+		
+		: <tipus(t,Unbound)>
+		[
+			(
+				@var retExpr = DescriptorValor();
+				"=" <expressio(retExpr, true)>
+				@if (!TipusPertany(t,retExpr.tipus)) throw SemanticError("Els tipus no concorden",(t,retExpr.tipus));
+			|
+				@var paramsConst = [];
+				<parametres(paramsConst)>
+				@t.ComprovarConstruible(paramsConst);
+			)
+		]
+		
+		@TS.Insertar(ETSVariable(nom, t));
+		@for(moreNom<-reverse(moreVariables)) {
+			TS.ComprovarDuplicat(moreNom);
+			TS.Insertar(ETSVariable(moreNom, t));
+		};
+		";"/*

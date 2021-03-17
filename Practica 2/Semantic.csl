@@ -43,7 +43,7 @@ SetOpcionesInformes(
     VerObligatorio=>true,
     VerAdicional=>true,
     VerCorrecto=>false,
-	VerExtensions=>["DeclaracionMultiplesVariablesMismoTipo"]
+	VerExtensions=>["DeclaracionMultiplesVariablesMismoTipo", "DeclaracionVariableAuto"]
 ); 
 
 // =============================================================================
@@ -342,34 +342,42 @@ Proc Compila(FileName:String,St=Unbound,VeureCodiGenerat=false,VeureCodiExecucio
 
    // <DecVar> =================================================================
    
-    Rule <DecVar>::= @var nom,t,dvRes=DescriptorValor();
-        identificador#(nom)
+    Rule <DecVar>::= @var nom,t;
+        Var identificador#(nom)
         @TS.ComprovarDuplicat(nom);
-        @var DescriptorsParametres=[];
+        @var moreVariables=[];
+		{
+			@var moreNom;
+			"," identificador#(moreNom)
+			@moreVariables=moreNom::moreVariables;
+		
+		}
 		(
 			: <tipus(t,Unbound)>
 			[
-				<parametres(DescriptorsParametres)>
-				@t.ComprovarConstruible(DescriptorsParametres);
-			]
-			[ "="
-			@dvRes.tipus = t;
-			<Expressio(dvRes,true)>
-			
-			@if(!TipusPertany(dvRes.tipus,t)) throw SemanticError("Els tipus no concorden");
+				(
+					@var retExpr = DescriptorValor();
+					"=" <expressio(retExpr, true)>
+					@if (!TipusPertany(t,retExpr.tipus)) throw SemanticError("Els tipus no concorden",(t,retExpr.tipus));
+				|
+					@var paramsConst = [];
+					<parametres(paramsConst)>
+					@t.ComprovarConstruible(paramsConst);
+				)
 			]
 		|
-			[
-			"=" <Expressio(dvRes,true)>
-			@t = dvRes.tipus;
-			]
+			@var retExpr = DescriptorValor();
+			"=" <expressio(retExpr, true)>
+			@t = retExpr.tipus;
 		)
-        
-        
-        @TS.Insertar(ETSVariable(nom,t));
-        ";"
-
-        
+		
+		@TS.Insertar(ETSVariable(nom, t));
+		@for(moreNom<-reverse(moreVariables)) {
+			TS.ComprovarDuplicat(moreNom);
+			TS.Insertar(ETSVariable(moreNom, t));
+		};
+		";"
+		
     // <DecFun> ================================================================
     Rule <DecFun>::= 
         @var nom, classe=TVoid, parametres, tipusRetorn;

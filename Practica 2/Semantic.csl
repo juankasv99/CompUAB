@@ -43,7 +43,7 @@ SetOpcionesInformes(
     VerObligatorio=>true,
     VerAdicional=>true,
     VerCorrecto=>false,
-	VerExtensions=>["DeclaracionMultiplesVariablesMismoTipo", "DeclaracionVariableAuto"]
+	VerExtensions=>Unbound
 ); 
 
 // =============================================================================
@@ -101,13 +101,14 @@ Proc Compila(FileName:String,St=Unbound,VeureCodiGenerat=false,VeureCodiExecucio
         + - * / identificador numero caracter string ( ) =
         == != > < >= <= ^
         ! && || 
+		~ & | //OperadorBoolBits
         , ; : . & "::"
         Type var Const Function Procedure constructor destructor
         Integer Real Character bool class array of "[" "]" "{" "}"
-        if then else while do return
-        Print PrintLn Exit
+        if then else while do return for
+        Print PrintLn Exit break
         delete new
-        true false null this operator
+        true false null this operator case
         IMPRIMIR_TAULA_DE_SIMBOLS
     BNF
     // <Programa> ==============================================================
@@ -146,14 +147,21 @@ Proc Compila(FileName:String,St=Unbound,VeureCodiGenerat=false,VeureCodiExecucio
             | Bool @t=TBool;
             | @t=TApuntador(Unbound);
               ^ <tipus(t.TipusBase,Unbound)>
-            | @var sz;
-              Array "[" 
-              numero#(sz)
-              @if (!TypeP(Int,sz)) throw SemanticError("Mida d'array errònia");       
-              @if (sz<=0) throw SemanticError("Mida d'array errònia");
-              "]" of
-              @t=TArray(sz,Unbound);
-              <tipus(t.TipusElements,NomRec)>
+            | @var sz, sz2, listDims=[];
+              Array 
+				"[" numero#(sz)
+					@if (!TypeP(Int,sz) || sz<=0) throw SemanticError("Mida d'array errònia");       
+					@listDims = sz::listDims;
+				{,
+					numero#(sz2)
+					@if (!TypeP(Int, sz2) || sz2<=0) throw SemanticError("Mida d'array errònia");
+					@listDims = sz2::listDims;
+				}
+              "]" 
+			  of <tipus(t,NomRec)>
+			  @for (d<-listDims) t=TArray(d,t);
+              
+              //<tipus(t.TipusElements,NomRec)>
             | @var nom;
               identificador#(nom)
                @{
@@ -484,11 +492,63 @@ Proc Compila(FileName:String,St=Unbound,VeureCodiGenerat=false,VeureCodiExecucio
         |
         // while ---------------------------------------------------------------
         @var dvRes=DescriptorValor();
+		@ts.Pila=TSSeparadorBucle("start", "end")::ts.Pila;
         while
             <Expressio(dvRes,true)>
             @if (dvRes.Tipus!=TBool) throw SemanticError("Error de tipus en while");
         do <instruccio>
+		@ts.EliminarAmbit();
         |
+		// case ----------------------------------------------------------------
+		@var dvRes=DescriptorValor();
+		case <Expressio(dvRes,true)> of 
+		"{"
+			@if (dvRes.Tipus!=TBool && dvRes.Tipus!=TInt && dvRes.Tipus!=TReal && dvRes.Tipus!=TChar) throw SemanticError("Error tipus dades case",dvRes.Tipus);
+			[
+				@Var dvRes2=DescriptorValor();
+				<factor(dvRes2,true)>:(";" | <instruccio> | "{" {<instruccio>} "}")
+					{
+						@Var dvRes3=DescriptorValor();
+						<factor(dvRes3,true)>:(";" | <instruccio> | "{" {<instruccio>} "}")
+					}
+			]
+			[else <instruccio>]
+		"}"
+		|
+		// for else ------------------------------------------------------------
+		@var descVal = DescriptorValor();
+        @ts.Pila=TSSeparadorBucle("start", "end")::ts.Pila;
+        for "("
+        [ ( <Expressio(descVal, true)>
+            @if (descVal.Tipus!:=TInt) Throw SemanticError("Bucle nomes accepta integers");
+        | <DecVar> ) ]
+        ";"
+        [ <Expressio(descVal, true)> 
+            @if (descVal.Tipus!:=TBool) Throw SemanticError("Condicio no es bool");
+        ]
+        ";"
+        [ <Expressio(descVal, true)> ]
+        ")"
+        <instruccio>
+        [ else <instruccio> ]
+        @ts.EliminarAmbit();
+        |
+		// break ---------------------------------------------------------------
+		@{
+            Var EtssMain=TS.Buscar("main");
+            if (!-](EtsMain<-EtssMain,TypeP(ETSFuncio,EtsMain) && EtsMain.TipusRetorn=:=TVoid && EtsMain.Parametres==[])) 
+                throw SemanticError("Falta declarar el procediment Main o se ha declarado incorrectamente");
+        }
+        @var stack = TS.Pila;
+        @var enBucle = false;
+        @while (stack!:=[] && !enBucle) {
+            if(TypeP(TSSeparadorFuncio, stack.head)) break;
+            if(TypeP(TSSeparadorBucle, stack.head)) enBucle = true;
+            stack=stack.Tail;
+        };
+        @if(!enBucle) throw SemanticError("Error per break fora de bucle");
+		break ";"
+		|
         // Print ---------------------------------------------------------------
         @var dvRes=DescriptorValor();
         (Print | PrintLn)
@@ -552,12 +612,21 @@ Proc Compila(FileName:String,St=Unbound,VeureCodiGenerat=false,VeureCodiExecucio
     // <Expressio> =============================================================
     Rule <Expressio(dvRes:DescriptorValor,Resultat:Bool)>::=
         <TerBool(dvRes,Resultat)> {
-            "||" 
-            @if (!Resultat) throw SemanticError("No s'aprofita el resultat");
-            @if (dvRes.Tipus!:=TBool) throw SemanticError("Error de tipus de dades en || ",dvRes.Tipus);
-            <TerBool(dvRes,true)>
-            @if (dvRes.Tipus!:=TBool) throw SemanticError("Error de tipus de dades en || ",dvRes.Tipus);
-            @dvRes.SetRValue(TBool);
+            (
+				"||"  
+				@if (!Resultat) throw SemanticError("No s'aprofita el resultat");
+				@if (dvRes.Tipus!:=TBool) throw SemanticError("Error de tipus de dades en || ",dvRes.Tipus);
+				<TerBool(dvRes,true)>
+				@if (dvRes.Tipus!:=TBool) throw SemanticError("Error de tipus de dades en || ",dvRes.Tipus);
+				@dvRes.SetRValue(TBool);
+			|
+				"|"
+				@if (!Resultat) throw SemanticError("No s'aprofita el resultat");
+				@if (dvRes.Tipus!:=TInt) throw SemanticError("Error de tipus de dades en | ",dvRes.Tipus);
+				<TerBool(dvRes,true)>
+				@if (dvRes.Tipus!:=TInt) throw SemanticError("Error de tipus de dades en | ",dvRes.Tipus);
+				@dvRes.SetRValue(TInt);
+			)
         }
         @AssociarAtribut("Resultat=",Resultat);
         @dvRes.AssociarAtributs();
@@ -565,12 +634,22 @@ Proc Compila(FileName:String,St=Unbound,VeureCodiGenerat=false,VeureCodiExecucio
     // <TerBool> ===============================================================
     Rule <TerBool(dvRes:DescriptorValor,Resultat:Bool)>::=
         <FacBool(dvRes,Resultat)> {
-            && 
-            @if (!Resultat) throw SemanticError("No s'aprofita el resultat");
-            @if (dvRes.Tipus!:=TBool) throw SemanticError("Error de tipus de dades en && ",dvRes.Tipus);
-            <FacBool(dvRes,true)>
-            @if (dvRes.Tipus!:=TBool) throw SemanticError("Error de tipus de dades en && ",dvRes.Tipus);
-            @dvRes.SetRValue(TBool);
+			(
+				&& 
+				@if (!Resultat) throw SemanticError("No s'aprofita el resultat");
+				@if (dvRes.Tipus!:=TBool) throw SemanticError("Error de tipus de dades en && ",dvRes.Tipus);
+				<FacBool(dvRes,true)>
+				@if (dvRes.Tipus!:=TBool) throw SemanticError("Error de tipus de dades en && ",dvRes.Tipus);
+				@dvRes.SetRValue(TBool);
+			|
+				"&"
+				@if (!Resultat) throw SemanticError("No s'aprofita el resultat");
+				@if (dvRes.Tipus!:=TInt) throw SemanticError("Error de tipus de dades en & ",dvRes.Tipus);
+				<FacBool(dvRes,true)>
+				@if (dvRes.Tipus!:=TInt) throw SemanticError("Error de tipus de dades en & ",dvRes.Tipus);
+				@dvRes.SetRValue(TInt);
+			)
+            
         }
         @AssociarAtribut("Resultat=",Resultat);
         @dvRes.AssociarAtributs();
@@ -677,6 +756,13 @@ Proc Compila(FileName:String,St=Unbound,VeureCodiGenerat=false,VeureCodiExecucio
         @if (dvRes.Tipus!:=TBool) throw SemanticError("Error de tipus de dades a !",dvRes.Tipus);
         @dvRes.SetRValue(TBool);
         | 
+		// ~ -------------------------------------------------------------------
+		~
+		@if(!Resultat) throw SemanticError("No s'aprofita el resultat");
+		<factor(dvRes,true)>
+		@if (dvRes.Tipus!:=TInt) throw SemanticError("Error de tipus de dades a ~",dvRes.Tipus);
+        @dvRes.SetRValue(TInt);
+		|
         // - -------------------------------------------------------------------
         -
         @if (!Resultat) throw SemanticError("No s'aprofita el resultat");
@@ -841,6 +927,17 @@ Proc Compila(FileName:String,St=Unbound,VeureCodiGenerat=false,VeureCodiExecucio
             if (dvIndex.Tipus!:=TInt) throw SemanticError("Tipus erroni en index");
             dvAcc.Tipus=dvAcc.Tipus.TipusElements;
         }
+		{,
+			@var dvIndex = DescriptorValor();
+			<Expressio(dvIndex,true)>
+			@{
+				if (!typeP(TArray,dvAcc.Tipus)) throw SemanticError("Tipus erroni en array");
+			}
+			@{
+				if (dvIndex.Tipus!:=TInt) throw SemanticError("Tipus erroni en index");
+				dvAcc.Tipus=dvAcc.Tipus.TipusElements;
+			}
+		}
         "]"
         @dvAcc.AssociarAtributs();
 

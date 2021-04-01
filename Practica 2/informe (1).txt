@@ -1,5 +1,0 @@
-NIA D'ALUMNE INCORRECTA (nom,cognoms,0000000,0000000@uab.cat)
-**********************************************************************
-CORRECCION ABORTADA POR ERROR EN LA IDENTIFICACION DEL GRUPO O ALUMNOS
-**********************************************************************
-

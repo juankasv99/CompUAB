@@ -1,5 +1,101 @@
-NIA D'ALUMNE INCORRECTA (nom,cognoms,0000000,0000000@uab.cat)
-**********************************************************************
-CORRECCION ABORTADA POR ERROR EN LA IDENTIFICACION DEL GRUPO O ALUMNOS
-**********************************************************************
+================================================================================
+INFORME OBLIGATORIO DE CORRECCION DE LA PRACTICA ===============================
+================================================================================
+Alumno.....: (Juan Carlos,Soriano Valle,1493037,0000000@uab.cat)
+Nombre.....: Juan Carlos
+Apellidos..: Soriano Valle
+NIA........: 1493037
+e-mail.....: 0000000@uab.cat
+
+-------------------------------------------------------------------------
+
+Fichero........: c:\tfg\Compiladors2021\Practicas\Analisi Semantica\1493037\Semantic.csl
+NIA Entrega....: 1493037
+Fecha..........: 1/4/2021
+Hora...........: 16:16
+Ampliaciones...: 
+    ArrayMultidimensional DeclaracionMultiplesVariablesMismoTipo
+    DeclaracionVariableAuto InstruccionBreak InstruccionCase InstruccionForElse
+    OperadorBoolBits
+
+
+################################################################################
+###                  SINTACTICO OBLIGATORIO: TEST QUE FALLAN                 ###
+################################################################################
+
+################################################################################
+###                   SINTACTICO ADICIONAL: TEST QUE FALLAN                  ###
+################################################################################
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoDeclaracionVariableAutoErrorSintactico3 OPCIONAL
+DESCRIPCION: Error declaración de variables sin tipo de datos
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        Var a,b=10;
+/*  4*/        PrintLn "a=",a;
+/*  5*/        PrintLn "b=",b;
+/*  6*/        PrintLn "&a-&b=", &a-&b;
+/*  7*/    }
+/*  8*/    
+--------------------------------------------------------
+Analitzant SintacticoDeclaracionVariableAutoErrorSintactico3
+TEST SintacticoDeclaracionVariableAutoErrorSintactico3 <<<FALLA>>> Unbound (3,3)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoInstruccionBreakErrorSintactico4 OPCIONAL
+DESCRIPCION: Verifica que se detectan correctamente errores sintácticos en break
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    break;
+/*  2*/    procedure main()
+/*  3*/    {
+/*  4*/    }
+/*  5*/    
+/*  6*/    
+--------------------------------------------------------
+Analitzant SintacticoInstruccionBreakErrorSintactico4
+Error a la linea 1 del fitxer SintacticoInstruccionBreakErrorSintactico4
+		break
+		^ main no declarat
+Call stack:
+0099C609: Constructor BackTrace(n:#Int)
+009983EF: Constructor Exception(Args...)
+00988667: Constructor SemanticError(Args...)
+00A27F2B: Fun ts:TaulaSimbols.Buscar(nom:String)
+0124480C: Proc PARSER_programa()
+00A6563A: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+00A52CE1: Proc TestSintactico(Nombre:Whole,extensions:Whole,descripcion:Whole,Keywords:Whole,Obligatorio:Whole,fuente:Whole,LineaError1:Whole,LineaError2:Whole,SemanticError:Whole,SubTest:Whole)
+00987369: Proc LoadFile(FileName:String)
+00987369: Proc LoadFile(FileName:String)
+00358A9E: Fun Start()
+
+TEST SintacticoInstruccionBreakErrorSintactico4 <<<FALLA>>> 1 (1,1)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+################################################################################
+###                  SEMANTICO OBLIGATORIO: TEST QUE FALLAN                  ###
+################################################################################
+
+================================================================================
+RESUMEN OBLIGATORIO ============================================================
+================================================================================
+
+Resultados sintactico ----------------------------------------------------------
+Test sintactico obligatorio OK............: 78 (100%) CORRECTO
+Test sintactico adicional OK..............: 47 (95.9184%)
+NOTA SINTACTICO...........................: 9.79592
+
+TEST ADICIONALES QUE FALLAN (2):
+    SintacticoDeclaracionVariableAutoErrorSintactico3
+    SintacticoInstruccionBreakErrorSintactico4
+
+Resultados semantico -----------------------------------------------------------
+Test semantico obligatorio OK.............: 87 (100%) CORRECTO
+Test semantico adicional OK...............: 40 (86.9565%)
+NOTA SEMANTICO............................: 9.34783
+
 

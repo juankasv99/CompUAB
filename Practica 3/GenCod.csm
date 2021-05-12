@@ -1,0 +1,1424 @@
+// =============================================================================
+// GENERACIO DE CODI COMPILADORS I =============================================
+// =============================================================================
+
+use com
+use semantic
+use queue
+
+// =============================================================================
+// Memoria en temps d'execució =================================================
+// =============================================================================
+
+Type MemoriaSegura(Mem,Sz) // Implementa acces segur a la memoria
+
+Fun [public] ms:MemoriaSegura.DWord(i:Int)=>
+{
+    if (i<0 || i>=ms.sz-3) throw Exception("Violació d'acces a l'adreça ",i);
+    ms.Mem.DWord(i);
+}
+
+Proc [public] ms:MemoriaSegura.DWord(i:Int)=v:Int=>
+{
+    if (i<0 || i>=ms.sz-3) throw Exception("Violació d'acces a l'adreça ",i);
+    ms.Mem.DWord(i)=v;
+}
+
+
+Fun [public] ms:MemoriaSegura.Word(i:Int)=>
+{
+    if (i<0 || i>=ms.sz-1) throw Exception("Violació d'acces a l'adreça ",i);
+    ms.Mem.Word(i);
+}
+
+Proc [public] ms:MemoriaSegura.Word(i:Int)=v:Int=>
+{
+    if (i<0 || i>=ms.sz-1) throw Exception("Violació d'acces a l'adreça ",i);
+    ms.Mem.Word(i)=v;
+}
+
+Fun [public] ms:MemoriaSegura.Byte(i:Int)=>
+{
+    if (i<0 || i>=ms.sz) throw Exception("Violació d'acces a l'adreça ",i);
+    ms.Mem.Byte(i);
+}
+
+Proc [public] ms:MemoriaSegura.Byte(i:Int)=v:Int=>
+{
+    if (i<0 || i>=ms.sz) throw Exception("Violació d'acces a l'adreça ",i);
+    ms.Mem.Byte(i)=v;
+}
+
+Fun [public] ms:MemoriaSegura.Double(i:Int)=>
+{
+    if (i<0 || i>=ms.sz-7) throw Exception("Violació d'acces a l'adreça ",i);
+    ms.Mem.Double(i);
+}
+
+Proc [public] ms:MemoriaSegura.Double(i:Int)=v:real=>
+{
+    if (i<0 || i>=ms.sz-7) throw Exception("Violació d'acces a l'adreça ",i);
+    ms.Mem.Double(i)=v;
+}
+
+
+Const MidaMemoria=100000; // mida de la memoria en bytes
+Const IniciHeap=50000;
+
+Var [public] Memoria=MemoriaSegura(MAlloc(MidaMemoria),MidaMemoria); // memoria de la maquina
+
+// =============================================================================
+// Etiquetes ===================================================================
+// =============================================================================
+
+Type [public] DefEtiqueta(eti,valor=>unbound)
+Type [public] RefEtiqueta(eti,Desp=>0)
+Type [public] Espai(eti,mida)
+
+// Etiqueta ====================================================================
+
+Var EtiquetaCnt=0;
+
+Type [public] Etiqueta(Nom,Valor,Referencies)
+
+Type ReferenciaPerResoldre(Ref,Desp)
+
+Constructor [public] Etiqueta()=>
+{
+    EtiquetaCnt=EtiquetaCnt+1;
+    This(strPrint("L",EtiquetaCnt),Unbound,[])
+}
+
+Constructor [public] Etiqueta(nom:String)=>
+{
+    if (nom[nom.length-1]=='%') {
+        EtiquetaCnt=EtiquetaCnt+1;
+        nom=strprint(nom[..nom.length-1],EtiquetaCnt);
+    }
+    This(nom,Unbound,[])
+}
+
+Proc [public] out:Stream.Print(e:Etiqueta)=>
+{
+    //out.Print(e.nom);
+    out.Print("<Etiqueta ",e.nom,":");
+    out.PutAddress(e);
+    out.Print(">");
+}
+
+Proc [public] e:Etiqueta.Instanciar(v:int)=>
+{
+    if (e.Valor!=Unbound) throw Exception("Instanciació d'etiqueta duplicada");
+    e.Valor=v;
+    for (r<-e.Referencies) Memoria.DWord(r.ref)=v+r.Desp;
+    e.Referencies=[];
+}
+
+Proc [public] e:Etiqueta.Referenciar(ref:int,Desp:int)=>
+{
+    if (e.Valor==Unbound) {
+        e.Referencies=ReferenciaPerResoldre(ref,desp)::e.Referencies;
+    }
+    else Memoria.DWord(ref)=e.Valor+Desp;
+}
+
+Fun [public] e:Etiqueta.TeValor=> e.Valor!=Unbound;
+
+
+// =============================================================================
+// MAQUINA ABSTRACTE ===========================================================
+// =============================================================================
+
+// Registres ===================================================================
+
+Var [public] PC; // Contador de programa
+var [public] SP; // Apuntador al final de la pila
+Var [public] B; // base del bloque de activación
+
+Var HeapFree; // Apuntador al Heap libre
+
+Var Running=true; // Continuar l'execució
+
+
+Var [public] entrada=cin;
+var [public] sortida=cout;
+
+// Instruccions ================================================================
+
+Type [public] DefInstruccio(format,procediment,nom=>Unbound)
+
+Var [public] DefinicioInstruccions=(
+    //IPushLit1 literal char
+    DefInstruccio("IPushLit I?", AProc()=> {
+        var sz=Memoria.DWord(pc+1);
+        sp=sp-sz;
+        for (i<-0..sz-1) Memoria.Byte(sp+i)=Memoria.Byte(pc+5+i);
+        pc=pc+5+sz;
+    }),
+    DefInstruccio("IPushBVar II", AProc()=> {
+        var sz=Memoria.DWord(pc+1);
+        var s=B+Memoria.DWord(pc+5);
+        sp=sp-sz;
+        for (i<-0..sz-1) Memoria.Byte(sp+i)=Memoria.Byte(s+i);
+        pc=pc+9;
+    }),
+    DefInstruccio("IPushGVar IE", AProc()=> {
+        var sz=Memoria.DWord(pc+1);
+        var s=Memoria.DWord(pc+5);
+        sp=sp-sz;
+        for (i<-0..sz-1) Memoria.Byte(sp+i)=Memoria.Byte(s+i);
+        pc=pc+9;
+    }),
+    DefInstruccio("IPushDispVar III", AProc()=> {
+        var sz=Memoria.DWord(pc+1);
+        var s=Memoria.DWord(B+Memoria.DWord(pc+5))+Memoria.DWord(pc+9);
+        sp=sp-sz;
+        for (i<-0..sz-1) Memoria.Byte(sp+i)=Memoria.Byte(s+i);
+        pc=pc+13;
+    }),
+    DefInstruccio("IPushInd I", AProc()=> {
+        var sz=Memoria.DWord(pc+1);
+        var s=Memoria.DWord(sp);
+        sp=sp-sz+4;
+        for (i<-0..sz-1) Memoria.Byte(sp+i)=Memoria.Byte(s+i);
+        pc=pc+5;
+    }),
+    DefInstruccio("IPushIndValueAddress I", AProc()=> {
+        var sz=Memoria.DWord(pc+1);
+        var s=Memoria.DWord(sp);
+        sp=sp-sz;
+        for (i<-0..sz-1) Memoria.Byte(sp+i+4)=Memoria.Byte(s+i);
+        Memoria.DWord(sp)=s;
+        pc=pc+5;
+    }),
+
+    DefInstruccio("IPopBVar II", AProc()=> {
+        var sz=Memoria.DWord(pc+1);
+        var d=B+Memoria.DWord(pc+5);
+        for (i<-0..sz-1) Memoria.Byte(d+i)=Memoria.Byte(sp+i);
+        sp=sp+sz;
+        pc=pc+9;
+    }),
+    DefInstruccio("IPopGVar IE", AProc()=> {
+        var sz=Memoria.DWord(pc+1);
+        var d=Memoria.DWord(pc+5);
+        for (i<-0..sz-1) Memoria.Byte(d+i)=Memoria.Byte(sp+i);
+        sp=sp+sz;
+        pc=pc+9;
+    }),
+    DefInstruccio("IPopDispVar III", AProc()=> {
+        var sz=Memoria.DWord(pc+1);
+        var d=Memoria.DWord(B+Memoria.DWord(pc+5))+Memoria.DWord(pc+9);
+        for (i<-0..sz-1) Memoria.Byte(d+i)=Memoria.Byte(sp+i);
+        sp=sp+sz;
+        pc=pc+13;
+    }),
+    DefInstruccio("IPopInd I", AProc()=> {
+        var sz=Memoria.DWord(pc+1);
+        var d=Memoria.DWord(sp);
+        sp=sp+4;
+        for (i<-0..sz-1) Memoria.Byte(d+i)=Memoria.Byte(sp+i);
+        sp=sp+sz;
+        pc=pc+5;
+    }),
+
+    DefInstruccio("IStoreBVar II", AProc()=> {
+        var sz=Memoria.DWord(pc+1);
+        var d=B+Memoria.DWord(pc+5);
+        for (i<-0..sz-1) Memoria.Byte(d+i)=Memoria.Byte(sp+i);
+        pc=pc+9;
+    }),
+    DefInstruccio("IStoreGVar IE", AProc()=> {
+        var sz=Memoria.DWord(pc+1);
+        var d=Memoria.DWord(pc+5);
+        for (i<-0..sz-1) Memoria.Byte(d+i)=Memoria.Byte(sp+i);
+        pc=pc+9;
+    }),
+    DefInstruccio("IStoreDispVar III", AProc()=> {
+        var sz=Memoria.DWord(pc+1);
+        var d=Memoria.DWord(B+Memoria.DWord(pc+5))+Memoria.DWord(pc+9);
+        for (i<-0..sz-1) Memoria.Byte(d+i)=Memoria.Byte(sp+i);
+        pc=pc+13;
+    }),
+    DefInstruccio("IStoreInd I", AProc()=> {
+        var sz=Memoria.DWord(pc+1);
+        var d=Memoria.DWord(sp);
+        sp=sp+4;
+        for (i<-0..sz-1) Memoria.Byte(d+i)=Memoria.Byte(sp+i);
+        pc=pc+5;
+    }),
+
+    DefInstruccio("IPushAddressBVar I", AProc()=> {
+        var s=B+Memoria.DWord(pc+1);
+        sp=sp-4;
+        Memoria.DWord(sp)=s;
+        pc=pc+5;
+    }),
+    DefInstruccio("IPushAddressGVar E", AProc()=> {
+        var s=Memoria.DWord(pc+1);
+        sp=sp-4;
+        Memoria.DWord(sp)=s;
+        pc=pc+5;
+    }),
+    DefInstruccio("IPushAddressDispVar II", AProc()=> {
+        var s=Memoria.DWord(B+Memoria.DWord(pc+1))+Memoria.DWord(pc+5);
+        sp=sp-4;
+        Memoria.DWord(sp)=s;
+        pc=pc+9;
+    }),
+
+    DefInstruccio("ICopyInd I", AProc()=> {
+        var sz=Memoria.DWord(pc+1);
+        var s=Memoria.DWord(sp+4);
+        var d=Memoria.DWord(sp);
+        sp=sp+8;
+        for (i<-0..sz-1) Memoria.Byte(d+i)=Memoria.Byte(s+i);
+        pc=pc+5;
+    }),
+    DefInstruccio("IDup I", AProc()=> {
+        var sz=Memoria.DWord(pc+1);
+        sp=sp-sz;
+        for (i<-0 .. sz-1) Memoria.Byte(sp+i)=Memoria.Byte(sp+sz+i);
+        pc=pc+5;
+    }),
+
+    DefInstruccio("ICall E", AProc()=> {
+        sp=sp-4;
+        Memoria.DWord(sp)=pc+5;
+        pc=Memoria.DWord(pc+1);
+    }),
+    DefInstruccio("ICallInd", AProc()=> {
+        var r=pc+1;
+        pc=Memoria.DWord(sp);
+        Memoria.DWord(sp)=r;
+    }),
+    DefInstruccio("IRet", AProc()=> {
+        pc=Memoria.DWord(sp);
+        sp=sp+4;
+    }),
+    DefInstruccio("ILink I", AProc()=> {
+        sp=sp-4;
+        Memoria.DWord(sp)=b;
+        b=sp;
+        sp=sp-Memoria.DWord(pc+1);
+        pc=pc+5;
+    }),
+    DefInstruccio("IUnlink", AProc()=> {
+        sp=b+4;
+        b=Memoria.DWord(b);
+        pc=pc+1;
+    }),
+    DefInstruccio("IPushB", AProc()=> {
+        sp=sp-4;
+        Memoria.DWord(sp)=b;
+        pc=pc+1;
+    }),
+    DefInstruccio("IPopB", AProc()=> {
+        b=Memoria.DWord(sp);
+        sp=sp+4;
+        pc=pc+1;
+    }),
+    //DefInstruccio("ISetBFromSP", AProc()=> {
+    //    b=Memoria.DWord(sp+Memoria.DWord(pc+1));
+    //    pc=pc+5;
+    //}),
+    DefInstruccio("IAddSP I", AProc()=> {
+        sp=sp+Memoria.DWord(pc+1);
+        pc=pc+5;
+    }),
+    //DefInstruccio("IPushSP", AProc()=> {
+    //    Memoria.DWord(sp-4)=sp;
+    //    sp=sp-4;
+    //    pc=pc+1;
+    //}),
+    //DefInstruccio("IPushSPVar II", AProc()=> {
+    //    var sz=Memoria.DWord(pc+1);
+    //    var s=sp+Memoria.DWord(pc+5);
+    //    sp=sp-sz;
+    //    for (i<-0 .. sz-1) Memoria.Byte(sp+i)=Memoria.Byte(s+i);
+    //    pc=pc+9;
+    //}),
+    DefInstruccio("IPushAddressSPVar I", AProc()=> {
+        Memoria.DWord(sp-4)=sp+Memoria.DWord(pc+1);
+        sp=sp-4;
+        pc=pc+5;
+    }),
+    DefInstruccio("IMoveTop II", AProc()=> {
+        // IMoveTop TopSz Desp
+        var sz=Memoria.DWord(pc+1);
+        var d=sp+Memoria.DWord(pc+5);
+        for (i<-~ 0 .. sz-1) Memoria.Byte(d+i)=Memoria.Byte(sp+i);
+        sp=d;
+        pc=pc+9;
+    }),
+
+    DefInstruccio("IJmp E", AProc()=> {
+        pc=Memoria.DWord(pc+1);
+    }),
+    DefInstruccio("IJmpTrue E", AProc()=> {
+        if (Memoria.DWord(sp)==0) pc=pc+5;
+        else pc=Memoria.DWord(pc+1);
+        sp=sp+4;
+    }),
+    DefInstruccio("IJmpFalse E", AProc()=> {
+        if (Memoria.DWord(sp)!=0) pc=pc+5;
+        else pc=Memoria.DWord(pc+1);
+        sp=sp+4;
+    }),
+
+    DefInstruccio("IAddInt", AProc()=> {
+        Memoria.DWord(sp+4)=Memoria.DWord(sp+4)+Memoria.DWord(sp);
+        sp=sp+4;
+        pc=pc+1;
+    }),
+    DefInstruccio("IAddReal", AProc()=> {
+        Memoria.Double(sp+8)=Memoria.Double(sp+8)+Memoria.Double(sp);
+        sp=sp+8;
+        pc=pc+1;
+    }),
+
+    DefInstruccio("ISubInt", AProc()=> {
+        Memoria.DWord(sp+4)=Memoria.DWord(sp+4)-Memoria.DWord(sp);
+        sp=sp+4;
+        pc=pc+1;
+    }),
+    DefInstruccio("ISubReal", AProc()=> {
+        Memoria.Double(sp+8)=Memoria.Double(sp+8)-Memoria.Double(sp);
+        sp=sp+8;
+        pc=pc+1;
+    }),
+
+    DefInstruccio("IMultInt", AProc()=> {
+        Memoria.DWord(sp+4)=Memoria.DWord(sp+4)*Memoria.DWord(sp);
+        sp=sp+4;
+        pc=pc+1;
+    }),
+    DefInstruccio("IMultReal", AProc()=> {
+        Memoria.Double(sp+8)=Memoria.Double(sp+8)*Memoria.Double(sp);
+        sp=sp+8;
+        pc=pc+1;
+    }),
+
+    DefInstruccio("IDivInt", AProc()=> {
+        Memoria.DWord(sp+4)=Memoria.DWord(sp+4) div Memoria.DWord(sp);
+        sp=sp+4;
+        pc=pc+1;
+    }),
+    DefInstruccio("IDivReal", AProc()=> {
+        Memoria.Double(sp+8)=Memoria.Double(sp+8)/Memoria.Double(sp);
+        sp=sp+8;
+        pc=pc+1;
+    }),
+    DefInstruccio("IModInt", AProc()=> {
+        Memoria.DWord(sp+4)=Memoria.DWord(sp+4)%Memoria.DWord(sp);
+        sp=sp+4;
+        pc=pc+1;
+    }),
+    DefInstruccio("IPowReal", AProc()=> {
+        Memoria.Double(sp+8)=Memoria.Double(sp+8)**Memoria.Double(sp);
+        sp=sp+8;
+        pc=pc+1;
+    }),
+    DefInstruccio("INegInt", AProc()=> {
+        Memoria.DWord(sp)=-Memoria.DWord(sp);
+        pc=pc+1;
+    }),
+    DefInstruccio("INegReal", AProc()=> {
+        Memoria.Double(sp)=-Memoria.Double(sp);
+        pc=pc+1;
+    }),
+    DefInstruccio("IAbsInt", AProc()=> {
+        Memoria.DWord(sp)=|Memoria.DWord(sp)|;
+        pc=pc+1;
+    }),
+    DefInstruccio("IAbsReal", AProc()=> {
+        Memoria.Double(sp)=|Memoria.Double(sp)|;
+        pc=pc+1;
+    }),
+
+    DefInstruccio("IEqChar", AProc()=> {
+        Memoria.DWord(sp-2)=if (Memoria.Byte(sp+1)==Memoria.Byte(sp)) 1 else 0;
+        sp=sp-2;
+        pc=pc+1;
+    }),
+    DefInstruccio("IEqInt", AProc()=> {
+        Memoria.DWord(sp+4)=if (Memoria.DWord(sp+4)==Memoria.DWord(sp)) 1 else 0;
+        sp=sp+4;
+        pc=pc+1;
+    }),
+    DefInstruccio("IEqReal", AProc()=> {
+        Memoria.DWord(sp+12)=if (Memoria.Double(sp+8)==Memoria.Double(sp)) 1 else 0;
+        sp=sp+12;
+        pc=pc+1;
+    }),
+    DefInstruccio("IEq I", AProc()=> { // Compara en igualdad los bytes que se indiquen
+        var sz=Memoria.DWord(pc+1);
+        var d=sp+sz;
+        var r=Search (i<-0..sz-1,Memoria.Byte(d+i)!=Memoria.Byte(sp+i)) 0 else 1;
+        sp=sp+2*sz-4;
+        Memoria.DWord(sp)=r;
+        pc=pc+5;
+    }),
+
+    DefInstruccio("INEqChar", AProc()=> {
+        Memoria.DWord(sp-2)=if (Memoria.Byte(sp+1)!=Memoria.Byte(sp)) 1 else 0;
+        sp=sp-2;
+        pc=pc+1;
+    }),
+    DefInstruccio("INEqInt", AProc()=> {
+        Memoria.DWord(sp+4)=if (Memoria.DWord(sp+4)!=Memoria.DWord(sp)) 1 else 0;
+        sp=sp+4;
+        pc=pc+1;
+    }),
+    DefInstruccio("INEqReal", AProc()=> {
+        Memoria.DWord(sp+12)=if (Memoria.Double(sp+8)!=Memoria.Double(sp)) 1 else 0;
+        sp=sp+12;
+        pc=pc+1;
+    }),
+    DefInstruccio("INEq I", AProc()=> { // Compara en diferente los bytes que se indiquen
+        var sz=Memoria.DWord(pc+1);
+        var d=sp+sz;
+        var r=Search (i<-0..sz-1,Memoria.Byte(d+i)!=Memoria.Byte(sp+i)) 1 else 0;
+        sp=sp+2*sz-4;
+        Memoria.DWord(sp)=r;
+        pc=pc+5;
+    }),
+
+    DefInstruccio("ILessChar", AProc()=> {
+        Memoria.DWord(sp-2)=if (Memoria.Byte(sp+1)<Memoria.Byte(sp)) 1 else 0;
+        sp=sp-2;
+        pc=pc+1;
+    }),
+    DefInstruccio("ILessInt", AProc()=> {
+        Memoria.DWord(sp+4)=if (Memoria.DWord(sp+4)<Memoria.DWord(sp)) 1 else 0;
+        sp=sp+4;
+        pc=pc+1;
+    }),
+    DefInstruccio("ILessReal", AProc()=> {
+        Memoria.DWord(sp+12)=if (Memoria.Double(sp+8)<Memoria.Double(sp)) 1 else 0;
+        sp=sp+12;
+        pc=pc+1;
+    }),
+
+    DefInstruccio("ILessEqChar", AProc()=> {
+        Memoria.DWord(sp-2)=if (Memoria.Byte(sp+1)<=Memoria.Byte(sp)) 1 else 0;
+        sp=sp-2;
+        pc=pc+1;
+    }),
+    DefInstruccio("ILessEqInt", AProc()=> {
+        Memoria.DWord(sp+4)=if (Memoria.DWord(sp+4)<=Memoria.DWord(sp)) 1 else 0;
+        sp=sp+4;
+        pc=pc+1;
+    }),
+    DefInstruccio("ILessEqReal", AProc()=> {
+        Memoria.DWord(sp+12)=if (Memoria.Double(sp+8)<=Memoria.Double(sp)) 1 else 0;
+        sp=sp+12;
+        pc=pc+1;
+    }),
+
+    DefInstruccio("IGreaterChar", AProc()=> {
+        Memoria.DWord(sp-2)=if (Memoria.Byte(sp+1)>Memoria.Byte(sp)) 1 else 0;
+        sp=sp-2;
+        pc=pc+1;
+    }),
+    DefInstruccio("IGreaterInt", AProc()=> {
+        Memoria.DWord(sp+4)=if (Memoria.DWord(sp+4)>Memoria.DWord(sp)) 1 else 0;
+        sp=sp+4;
+        pc=pc+1;
+    }),
+    DefInstruccio("IGreaterReal", AProc()=> {
+        Memoria.DWord(sp+12)=if (Memoria.Double(sp+8)>Memoria.Double(sp)) 1 else 0;
+        sp=sp+12;
+        pc=pc+1;
+    }),
+
+    DefInstruccio("IGreaterEqChar", AProc()=> {
+        Memoria.DWord(sp-2)=if (Memoria.Byte(sp+1)>=Memoria.Byte(sp)) 1 else 0;
+        sp=sp-2;
+        pc=pc+1;
+    }),
+    DefInstruccio("IGreaterEqInt", AProc()=> {
+        Memoria.DWord(sp+4)=if (Memoria.DWord(sp+4)>=Memoria.DWord(sp)) 1 else 0;
+        sp=sp+4;
+        pc=pc+1;
+    }),
+    DefInstruccio("IGreaterEqReal", AProc()=> {
+        Memoria.DWord(sp+12)=if (Memoria.Double(sp+8)>=Memoria.Double(sp)) 1 else 0;
+        sp=sp+12;
+        pc=pc+1;
+    }),
+
+    DefInstruccio("INot", AProc()=> {
+        Memoria.DWord(sp)=if (Memoria.DWord(sp)==0) 1 else 0;
+        pc=pc+1;
+    }),
+    DefInstruccio("IAnd", AProc()=> {
+        Memoria.DWord(sp+4)=if (Memoria.DWord(sp+4)!=0 && Memoria.DWord(sp)!=0) 1 else 0;
+        sp=sp+4;
+        pc=pc+1;
+    }),
+    DefInstruccio("IOr", AProc()=> {
+        Memoria.DWord(sp+4)=if (Memoria.DWord(sp+4)!=0 || Memoria.DWord(sp)!=0) 1 else 0;
+        sp=sp+4;
+        pc=pc+1;
+    }),
+
+    DefInstruccio("INotBit", AProc()=> {
+        Memoria.DWord(sp)= ~Memoria.DWord(sp);
+        pc=pc+1;
+    }),
+    DefInstruccio("IAndBit", AProc()=> {
+        Memoria.DWord(sp+4)=Memoria.DWord(sp+4) & Memoria.DWord(sp);
+        sp=sp+4;
+        pc=pc+1;
+    }),
+    DefInstruccio("IOrBit", AProc()=> {
+        Memoria.DWord(sp+4)=Memoria.DWord(sp+4) | Memoria.DWord(sp);
+        sp=sp+4;
+        pc=pc+1;
+    }),
+
+    DefInstruccio("ICharToInt", AProc()=> {
+        Memoria.DWord(sp-3)=Memoria.Byte(sp);
+        sp=sp-3;
+        pc=pc+1;
+    }),
+    DefInstruccio("IIntToReal", AProc()=> {
+        Memoria.Double(sp-4)=Memoria.DWord(sp);
+        sp=sp-4;
+        pc=pc+1;
+    }),
+
+    DefInstruccio("IIntToChar", AProc()=> {
+        Memoria.Byte(sp+3)=Memoria.DWord(sp);
+        sp=sp+3;
+        pc=pc+1;
+    }),
+    DefInstruccio("IRealToInt", AProc()=> {
+        Memoria.DWord(sp+4)=Coerce(int,Memoria.Double(sp));
+        sp=sp+4;
+        pc=pc+1;
+    }),
+    DefInstruccio("IPrintBool", AProc()=> {
+        sortida.Print(if (Memoria.Word(sp)==0) false else true);
+        sp=sp+4;
+        pc=pc+1;
+    }),
+    DefInstruccio("IPrintChar", AProc()=> {
+        sortida.Print(Coerce(char,Memoria.Byte(sp)));
+        sp=sp+1;
+        pc=pc+1;
+    }),
+    DefInstruccio("IPrintInt", AProc()=> {
+        sortida.Print(Memoria.DWord(sp));
+        sp=sp+4;
+        pc=pc+1;
+    }),
+    DefInstruccio("IPrintReal", AProc()=> {
+        sortida.Print(Memoria.Double(sp));
+        sp=sp+8;
+        pc=pc+1;
+    }),
+    DefInstruccio("IPrintString I", AProc()=> {
+        for (i<-1..Memoria.DWord(pc+1)) {
+            sortida.Print(Coerce(Char,Memoria.Byte(sp)));
+            sp=sp+1;
+        }
+        pc=pc+5;
+    }),
+
+    DefInstruccio("IReadChar", AProc()=> {
+        sp=sp-1;
+        Memoria.Byte(sp)=Coerce(Int,entrada.get());
+        pc=pc+1;
+    }),
+    DefInstruccio("IReadInt", AProc()=> {
+        sp=sp-4;
+        Memoria.DWord(sp)=Coerce(Int,entrada.read());
+        pc=pc+1;
+    }),
+    DefInstruccio("IReadReal", AProc()=> {
+        sp=sp-8;
+        Memoria.double(sp)=Coerce(real,entrada.read());
+        pc=pc+1;
+    }),
+    DefInstruccio("IExit", AProc()=> {
+        Running=false;
+    }),
+    DefInstruccio("IMAlloc I", AProc()=> {
+        // TODO: Implementar un gestor del Heap
+        sp=sp-4;
+        Memoria.DWord(sp)=HeapFree;
+        HeapFree=HeapFree+Memoria.DWord(pc+1);
+        if (HeapFree>MidaMemoria) throw Exception("HEAP LLENO");
+        pc=pc+5;
+    }),
+    DefInstruccio("IDelete", AProc()=> {
+        // TODO: Implementar un gestor del Heap
+        sp=sp+4;
+        pc=pc+1;
+    }),
+    DefInstruccio("IIncSPValue II", AProc()=> {
+        var desp=Memoria.DWord(pc+1);
+        var inc=Memoria.DWord(pc+5);
+        Memoria.DWord(sp+desp)=Memoria.DWord(sp+desp)+inc;
+        pc=pc+9;
+    }),
+    DefInstruccio("IIncInt", AProc()=> {
+        var s=Memoria.DWord(sp);
+        sp=sp+4;
+        Memoria.DWord(s)=Memoria.DWord(s)+1;
+        pc=pc+1;
+    }),
+    DefInstruccio("IIncReal", AProc()=> {
+        var s=Memoria.DWord(sp);
+        sp=sp+4;
+        Memoria.Double(s)=Memoria.Double(s)+1;
+        pc=pc+1;
+    }),
+    DefInstruccio("IDecInt", AProc()=> {
+        var s=Memoria.DWord(sp);
+        sp=sp+4;
+        Memoria.DWord(s)=Memoria.DWord(s)-1;
+        pc=pc+1;
+    }),
+    DefInstruccio("IDecReal", AProc()=> {
+        var s=Memoria.DWord(sp);
+        sp=sp+4;
+        Memoria.Double(s)=Memoria.Double(s)-1;
+        pc=pc+1;
+    }),
+    DefInstruccio("IPreIncInt", AProc()=> {
+        var s=Memoria.DWord(sp);
+        Memoria.DWord(sp)=Memoria.DWord(s)=Memoria.DWord(s)+1;
+        pc=pc+1;
+    }),
+    DefInstruccio("IPreIncReal", AProc()=> {
+        var s=Memoria.DWord(sp);
+        sp=sp-4;
+        Memoria.Double(sp)=Memoria.Double(s)=Memoria.Double(s)+1;
+        pc=pc+1;
+    }),
+    DefInstruccio("IPreDecInt", AProc()=> {
+        var s=Memoria.DWord(sp);
+        Memoria.DWord(sp)=Memoria.DWord(s)=Memoria.DWord(s)-1;
+        pc=pc+1;
+    }),
+    DefInstruccio("IPreDecReal", AProc()=> {
+        var s=Memoria.DWord(sp);
+        sp=sp-4;
+        Memoria.Double(sp)=Memoria.Double(s)=Memoria.Double(s)-1;
+        pc=pc+1;
+    }),
+    DefInstruccio("IPostIncInt", AProc()=> {
+        var s=Memoria.DWord(sp);
+        Memoria.DWord(sp)=Memoria.DWord(s);
+        Memoria.DWord(s)=Memoria.DWord(s)+1;
+        pc=pc+1;
+    }),
+    DefInstruccio("IPostIncReal", AProc()=> {
+        var s=Memoria.DWord(sp);
+        sp=sp-4;
+        Memoria.Double(sp)=Memoria.Double(s);
+        Memoria.Double(s)=Memoria.Double(s)+1;
+        pc=pc+1;
+    }),
+    DefInstruccio("IPostDecInt", AProc()=> {
+        var s=Memoria.DWord(sp);
+        Memoria.DWord(sp)=Memoria.DWord(s);
+        Memoria.DWord(s)=Memoria.DWord(s)-1;
+        pc=pc+1;
+    }),
+    DefInstruccio("IPostDecReal", AProc()=> {
+        var s=Memoria.DWord(sp);
+        sp=sp-4;
+        Memoria.Double(sp)=Memoria.Double(s);
+        Memoria.Double(s)=Memoria.Double(s)-1;
+        pc=pc+1;
+    })
+);
+
+for (ci<-DefinicioInstruccions:Index) {
+    var nom=DefinicioInstruccions[ci].format;
+    search (i<-nom:index,nom[i]==' ') nom=nom[..i];
+    nom=intern(nom);
+    DefinicioInstruccions[ci].nom=nom;
+    void execute(<<const [public] <nom> >>);
+}
+
+// Run =========================================================================
+
+var [public] EtiquetesBolcades=[];
+
+Proc [public] Run(inici,debug=false,StopAt=10000)=>
+{
+    //cout.PrintLn(EtiquetesBolcades);
+    //debug=false;
+    sp=IniciHeap;
+    HeapFree=IniciHeap;
+    b=sp;
+    pc=inici;
+    Running=true;
+    while (Running) {
+        //cout.PrintLn(pc);
+        var codins=memoria.Byte(pc);
+        if (codins>=DefinicioInstruccions.Length) {
+            Throw Exception("Codi d'instrucció erroni ", codins, " a l'adreça ",pc);
+        }
+        if (debug) {
+            var out=OutStrStream();
+            out.print(FmtWidth(4),fmtFill('0'),pc,FmtWidth(0)," ");
+            Search (e<-EtiquetesBolcades, e.Valor=:=pc) {
+                var tmp=e.nom++":                    ";
+                out.Print(tmp[0..20]," ");
+            }
+            else out.Print("                     ");
+            var ins=DefinicioInstruccions[codins].Format;
+            var i=0;
+            var inslen=ins.length;
+            while (i<inslen && ins[i]>' ') {
+                out.Print(ins[i]);
+                ++i;
+            }
+            out.print(" ");
+            var p=pc+1;
+            for (i<-i+1 .. inslen-1) {
+                switch (ins[i]) {
+                    ' '=> {}
+                    'I'=> {out.print(memoria.dword(p)," "); p=p+4; }
+                    'E'=> {
+                        var d=memoria.dword(p);
+                        var eti=unbound; 
+                        for (e<-EtiquetesBolcades, e.Valor<=d, eti=:=unbound || e.Valor>eti.Valor) eti=e;
+                        if (eti=:=unbound) out.print(d," ");
+                        if (eti.Valor==d) out.print(eti.nom," ");
+                        else out.print(eti.nom,"+",d-eti.Valor," ");
+                        p=p+4; 
+                    }
+                    '?'=> {
+                        switch (memoria.dword(p-4)) {
+                            4=> out.print(memoria.dword(p));
+                            8=> out.print(memoria.double(p));
+                            1=> out.print(fmtReadable,Coerce(char,memoria.byte(p)));
+                            others=> {
+                                var s=OutStrStream();
+                                for (i<-0..memoria.dword(p-4)-1) s.Print(Coerce(char,memoria.byte(p+i)));
+                                out.print(fmtReadable,s.Str());
+                            }
+                        }
+                        out.print("?");
+                    }
+                }
+            }
+            for (i<-out.str().Length..50) out.Print(" ");
+            out.Print(" SP=",FmtWidth(6),SP);
+            out.Print(" Stack: ");
+            for (i<-0..min(20,IniciHeap-SP-1)) out.print(Memoria.Byte(SP+i)," ");
+            out.Print("...");
+            cout.PrintLn();
+            cout.Print(out.str());
+        }
+        DefinicioInstruccions[codins].procediment()();
+        --StopAt;
+        if (StopAt<0) throw Exception("Se ha sobrepasado el límite de instrucciones a ejecutar"); 
+    }
+    cout.PrintLn();
+    cout.PrintLn("Execució sense errors");
+}
+
+
+// =============================================================================
+// CODI EN GENERACIO ===========================================================
+// =============================================================================
+
+/*
+    El codi en generació será una cua amb el seguent contingut
+    Codi instrucció: simbol que identifica la instrucció
+    Paràmetre de la instrucció: int, real, string, char
+    referencia a etiqueta: RefEtiqueta(etiqueta,desplaçament)
+    instància etiqueta amb adreça del codi: DefEtiqueta(etiqueta)
+    instància etiqueta amb valor: DefEtiqueta(etiqueta,valor)
+    instància etiqueta amb adreça de un espai de memòria y
+        el reserva: Espai(etiqueta,n bytes)
+    
+    El codi en generació pot trobar-se en un dels següents estats:
+    El codi no te resultat:
+        TipusResultat=TVoid
+    El resultat del codi es un RValue
+        TipusResultat=tipus del resultat (!=TVoid)
+        Si el resultat es un tipus de dades simple després de executar el codi
+        es trobarà a la pila (adreca==unbound)
+        Si el resultat es un tipus de dades compost desprès de executar el codi
+        la adreça es trobarà on indiqui el camp adreca (adreca!=unbound)
+    El resultat del codi es un LValue:
+        TipusResultat=tipus del resultat (!=TVoid)
+        El resultat es un tipus de dades compost desprès de executar el codi
+        la adreça es trobarà on indiqui el camp adreca (adreca!=unbound)
+        
+    OPERACIONS AMB CODIS
+    ---------------------
+    
+    - Afegir isntruccions, etiquetes, etc. Cod.Put(...)
+    - Concatenar codis: Cod.Concat(cod2)
+        Cod ha de complir: adreca==unbound o AddressInStack
+    - Obtenir referencia en la pila  cod.CodiResultatReferencia()
+        Cod ha de complir: adreca!=unbound && TipusResultat!=TVoid
+    - Obtenir valor en la pila: cod.CodiResultatValor()
+        Cod ha de complir:
+            adreca==unbound && TipusResultat!=TVoid ||
+            adreca!=unbound && TipusResultat!=TVoid && 
+            si tipus compost s'ha de poder construir per copia a la pila
+    - Assignar valor cod.CodiAssing(desti)
+        cod.Tipus!=TVoid
+        desti.Tipus!=TVoid
+        desti.adreca!=unbound
+        S'ha de poder fer l'assignació per copia o cridant a l'assignador.
+*/
+
+Type [public] CodiEnGeneracio(
+    Codi, // cua amb les instruccions del codi
+    Adreca // representació d'adreça o unbound
+    //TipusResultat, // tipus del resultat (no resultat TVoid)
+    //LValue // El resultat es un LValue (true) o RValue (false) 
+    ) from DescriptorValor;
+    
+Type [public,print=contents] Comentari(text);
+Type [public,print=contents] ComentariLinea(text);
+Type [public,print=contents] ComentariIniciLinea(text);
+
+Constructor [public] Comentari(v...)=> this(strPrint(v...));
+Constructor [public] ComentariLinea(v...)=> this(strPrint(v...));
+Constructor [public] ComentariIniciLinea(v...)=> this(strPrint(v...));
+
+Type [public,print=Contents] StackAddress(Desp);
+
+Type [public] TipusAdreca=RefEtiqueta | Vector | StackAddress | AddressInStack | Queue;
+
+
+// CodiEnGeneracio =============================================================
+
+Constructor [public] CodiEnGeneracio() from DescriptorValor() =>
+{    
+    This(Queue(),unbound)
+}
+
+// CleanValue ==================================================================
+
+Proc [public] this:CodiEnGeneracio.CleanValue()=>
+{
+    if (this.Tipus!=TVoid && this.Adreca=:=unbound && this.Constant=:=unbound) {
+        throw Exception("CleanValue: Error intern no es pot eleminar un valor si ja s'ha generat el seu codi");
+    }
+    this.Tipus=TVoid;
+    this.Adreca=unbound;
+    this.Constant=unbound;
+    this.PermisLectura=false;
+    this.PermisEscriptura=false;
+}
+
+// SetAdreca ===================================================================
+
+Proc [public] this:CodiEnGeneracio.SetAdreca(adreca,tipus:TipusDeDades)=>
+{
+    this.Tipus=tipus;
+    this.Adreca=adreca;
+    this.Constant=unbound;
+}
+
+// SetConstant =================================================================
+
+Proc [public] this:CodiEnGeneracio.SetConstant(cte,tipus:TipusDeDades)=>
+{
+    this.Constant=cte;
+    this.Tipus=tipus;
+    this.PermisLectura=true;
+    this.PermisEscriptura=false;
+    this.Adreca=unbound;
+}
+
+// Put =========================================================================
+
+Proc [public] cod:CodiEnGeneracio.Put(e)=> cod.Codi.put(e);
+
+Proc [public] cod:CodiEnGeneracio.Put(v...)=> cod.Codi.Put(v...);
+
+// Concat ======================================================================
+
+Proc [public] cod:CodiEnGeneracio.Concat(cod2:CodiEnGeneracio)=>
+{
+    if (cod.Adreca!=unbound && cod.Adreca!=AddressInStack) throw Exception("Error al concatenar un codi amb adreça");
+    if (cod.Constant!=unbound ) throw Exception("Error al concatenar un codi amb constant");
+    cod.Codi.PutElements(cod2.Codi);
+    cod.Adreca=cod2.Adreca;
+    cod.Tipus=cod2.Tipus;
+    cod.PermisLectura=cod2.PermisLectura;
+    cod.PermisEscriptura=cod2.PermisEscriptura;
+    cod.Constant=cod2.Constant;
+}
+
+// GetInstruccions =============================================================
+
+Fun [public] cod:CodiEnGeneracio.GetInstruccions()=>cod.Codi.GetList();
+
+
+// AssociarAtributs ============================================================
+
+Proc [public] this:CodiEnGeneracio.AssociarAtributs()=>
+{
+    this.DescriptorValor.AssociarAtributs();
+    if (this.Adreca!=unbound) {
+        var a=StrPrint(this.Adreca);
+        AssociarAtribut("Adreca=",a[..min(20,a.length)]);
+    }
+}
+
+// ImprimirCodi =========================================================
+
+proc [public] ImprimirCodi(cod:Queue,out:Stream=cout)=>
+{
+    var pos=0;
+    const posicioninicio,posicioninstruccion,posicionparametros;
+    var posicionlinea=posicioninicio;
+    var linea=OutStrStream();
+    proc posicionarInicio()=>
+    {
+        if (posicionlinea!=posicioninicio) out.printLn(linea.str());
+        linea=OutStrStream();
+        posicionlinea=posicioninicio;
+        linea.print(FmtWidth(4),fmtFill('0'),pos,FmtWidth(0)," ");
+    }
+    proc posicionarInstruccion()=>
+    {
+        if (posicionlinea!=posicioninstruccion) {
+            if (posicionlinea!=posicioninicio) out.printLn(linea.str());
+            linea=OutStrStream();
+            linea.print(FmtWidth(4),fmtFill('0'),pos,FmtWidth(0),"                     ");
+        }
+        posicionlinea=posicioninstruccion;
+    }
+    for (e<-cod.GetList()) {
+        switch (e) {
+            symbol => {
+                posicionarinstruccion();
+                linea.Print(e," ");
+                posicionlinea=posicionparametros;
+                ++pos
+            }
+            DefEtiqueta => {
+                posicionarinicio();
+                if (e.Valor==Unbound) {
+                    if (e.eti.nom.length<20) {
+                        linea.Print(strPrint(e.eti.nom,":                             ")[..20]);
+                        posicionlinea=posicioninstruccion;
+                    }
+                    else {
+                        linea.Print(e.eti.nom,":");
+                        posicionlinea=posicionparametros;
+                    }
+                }
+                else {
+                    linea.Print(e.eti.nom,"= ",e.Valor );
+                    posicionlinea=posicionparametros;
+                }
+            }
+            RefEtiqueta => {
+                linea.Print(e.eti.nom);
+                if (e.desp!=0) cout.Print('+',e.desp);
+                linea.print(' ');
+                pos=pos+4;
+            }
+            Espai => {
+                posicionarinicio();
+                linea.Print(strPrint(e.eti.nom,":                              ")[..20],
+                "ESPAI ", e.Mida," Bytes");
+                //cout.Print("Espai(",e.Eti,", ",e.Mida,")");
+                posicionlinea=posicionparametros;
+                pos=pos+e.Mida;
+            }
+            char => {
+                linea.Print(FmtReadable,e);
+                linea.Print(" ");
+                pos=pos+1;
+            }
+            string => {
+                linea.Print(FmtReadable,e);
+                linea.Print(" ");
+                pos=pos+e.length;
+            }
+            Int => {
+                linea.Print(FmtReadable,e);
+                linea.Print(" ");
+                pos=pos+4;
+            }
+            Real => {
+                linea.Print(FmtReadable,e);
+                linea.Print(" ");
+                pos=pos+8;
+            }
+            Comentari => {
+                var l=linea.str().length;
+                while (l<60) {
+                    linea.put(' ');
+                    ++l;
+                }
+                linea.Print("// ",e.text);
+                posicionlinea=posicionparametros;
+            }
+            ComentariLinea => {
+                posicionarinicio();
+                var l=linea.str().length;
+                while (l<60) {
+                    linea.put(' ');
+                    ++l;
+                }
+                linea.Print("-- ",e.text);
+                posicionlinea=posicionparametros;
+            }
+            ComentariIniciLinea => {
+                posicionarinicio();
+                linea.Print("// ",e.text);
+                posicionlinea=posicionparametros;
+            }
+            Others => linea.Print(e," ");
+        }
+    }
+    if (posicionlinea!=posicioninicio) out.printLn(linea.str());
+}
+
+// VeureCodiGenerat ============================================================
+
+proc [public] cod:CodiEnGeneracio.VeureCodiGenerat()=>
+{
+    cout.PrintLn("=====================================================================");
+    ImprimirCodi(cod.codi);
+    if (cod.Adreca!=unbound) {
+        cout.PrintLn("ADRECA ----------------------------------------------------------");
+        switch (cod.Adreca) {
+            RefEtiqueta => cout.PrintLn("RefEtiqueta: ",cod.adreca.eti.nom,
+                if (cod.adreca.desp!=0) strPrint("+ ",cod.Adreca.desp) else "");
+            Vector => cout.PrintLn("Local: ",cod.adreca);
+            Queue => ImprimirCodi(cod.adreca);
+            AddressInStack => cout.PrintLn("Referencia en la Pila");
+        }        
+    }
+    cout.PrintLn("=====================================================================");
+}
+
+// ImprimirCodiGenerat =========================================================
+
+proc [public] cod:CodiEnGeneracio.ImprimirCodiGenerat(out:Stream=cout)=>
+{
+    var pos=0;
+    out.PrintLn();
+    out.PrintLn("=====================================================================");
+    ImprimirCodi(cod.codi,out);
+    out.PrintLn("=====================================================================");
+}
+
+// Bolcar ======================================================================
+
+Var [public] Estadistica;
+Var [public] CodiBolcat=[];
+
+Proc [public] BolcarSimple(cod:CodiEnGeneracio) =>
+{
+    //cout.PrintLn("==============================================");
+    //cout.PrintLn("Contingut del bolcat a memoria");
+    Var pos=0;
+    Estadistica=[];
+    CodiBolcat=cod;
+    EtiquetesBolcades=[];
+
+    for (e<-cod.Codi.GetList()) {
+        switch (e) {
+            char => {
+                //cout.PrintLn(pos,"    ","'",e,"'");
+                Memoria.Byte(pos)=Coerce(int,e);
+                pos=pos+1;
+            }
+            int => {
+                //cout.PrintLn(pos,"    ",e);
+                Memoria.DWord(pos)=e;
+                pos=pos+4;
+            }
+            Real => {
+                //cout.PrintLn(pos,"    ",e);
+                Memoria.Double(pos)=e;
+                pos=pos+8;
+            }
+            String => {
+                for (i<-e:index) {
+                    Memoria.Byte(pos)=Coerce(int,e[i]);
+                    ++pos;
+                }
+            }
+            symbol => {
+                Memoria.Byte(pos)=Found (codi<-DefinicioInstruccions:Index,
+                    e=:=DefinicioInstruccions[codi].nom) codi;
+                //cout.PrintLn(pos,"    ",Memoria.Byte(pos),"   ",e);
+                pos=pos+1;
+                search (p<-estadistica,p[0]==e) ++p[1];
+                else estadistica=(e,1)::estadistica;
+            }
+            RefEtiqueta => {
+                //cout.PrintLn(pos,"    ","????","   ",e.eti.nom);
+                e.Eti.referenciar(pos,e.Desp);
+                pos=pos+4;
+            }
+            DefEtiqueta => {
+                //cout.PrintLn(e.eti.nom,"=",pos);
+                e.eti.Instanciar(if (e.valor==Unbound) pos else e.valor);
+            }
+            Espai => {
+                //cout.PrintLn(pos, e.eti.nom," ESPAI ",e.mida);
+                e.eti.Instanciar(pos);
+                pos=pos+e.mida;
+                Search (eti2<-EtiquetesBolcades,e.eti=:=eti2) {} else EtiquetesBolcades=e.eti::EtiquetesBolcades;
+            }
+            Comentari => {}
+            ComentariLinea => {}
+            ComentariIniciLinea => {}
+        }
+    }
+    //cout.PrintLn("==============================================");
+}
+
+Proc [public] Bolcar(cod:CodiEnGeneracio) =>
+{
+    //cout.PrintLn("==============================================");
+    //cout.PrintLn("Contingut del bolcat a memoria");
+    Var pos=0;
+    Estadistica=[];
+    EtiquetesBolcades=[];
+    CodiBolcat=cod;
+    var q=queue();
+    q.PutElements(cod.codi.GetList()); 
+    while (!q.EmptyP()) {
+        var e=q.Get();
+        switch (e) {
+            symbol => {
+                Search (codi<-DefinicioInstruccions:Index,
+                    e=:=DefinicioInstruccions[codi].nom) {
+                    Var def=DefinicioInstruccions[codi];
+                    Memoria.Byte(pos)=codi;
+                    //cout.PrintLn(pos,"    ",Memoria.Byte(pos),"   ",e);
+                    ++pos;
+                    // Estadistica d'instruccions generades
+                    search (p<-estadistica,p[0]==e) ++p[1];
+                    else estadistica=(e,1)::estadistica;
+                    // Analitzar els paràmetres
+                    var fparam=Search (i<-def.format:index,def.format[i]==' ') def.format[i+1..] else "";
+                    for (p<-fparam:IndexValue) {
+                        e=q.Get();
+                        //cout.PrintLN("Param: ",(p,e));
+                        switch (p) {
+                            'I'=> {
+                                switch (e) {
+                                    int => {
+                                        //cout.PrintLn(pos,"    ",e);
+                                        Memoria.DWord(pos)=e;
+                                        pos=pos+4;
+                                    }
+                                    RefEtiqueta => {
+                                        //cout.PrintLn(pos,"    ","????","   ",e.eti.nom);
+                                        e.Eti.referenciar(pos,e.Desp);
+                                        pos=pos+4;
+                                    }
+                                    Others=> throw Exception("Error en paràmetre a la instrucció: ",def.format,". Paràmetre: ", e);                
+                                }
+                            }
+                            'E'=> {
+                                switch (e) {
+                                    RefEtiqueta => {
+                                        //cout.PrintLn(pos,"    ","????","   ",e.eti.nom);
+                                        e.Eti.referenciar(pos,e.Desp);
+                                        pos=pos+4;
+                                    }
+                                    Others=> throw Exception("Error en paràmetre a la instrucció: ",def.format,". Paràmetre: ", e);                
+                                }
+                            }
+                            '?'=> {
+                                switch (e) {
+                                    char => {
+                                        //cout.PrintLn(pos,"    ","'",e,"'");
+                                        Memoria.Byte(pos)=Coerce(int,e);
+                                        pos=pos+1;
+                                    }
+                                    int => {
+                                        //cout.PrintLn(pos,"    ",e);
+                                        Memoria.DWord(pos)=e;
+                                        pos=pos+4;
+                                    }
+                                    Real => {
+                                        //cout.PrintLn(pos,"    ",e);
+                                        Memoria.Double(pos)=e;
+                                        pos=pos+8;
+                                    }
+                                    String => {
+                                        for (i<-e:index) {
+                                            Memoria.Byte(pos)=Coerce(int,e[i]);
+                                            ++pos;
+                                        }
+                                    }
+                                    RefEtiqueta => {
+                                        //cout.PrintLn(pos,"    ","????","   ",e.eti.nom);
+                                        e.Eti.referenciar(pos,e.Desp);
+                                        pos=pos+4;
+                                    }
+                                    Others=> throw Exception("Error en paràmetre a la instrucció: ",def.format,". Paràmetre: ", e);                
+                                }
+                            }
+                        }
+                    }
+                }
+                else throw Exception("Instruccio de codi máquina no definida: ",e);                
+            }
+            DefEtiqueta => {
+                //cout.PrintLn(e.eti.nom,"=",pos);
+                e.eti.Instanciar(if (e.valor==Unbound) pos else e.valor);
+                Search (eti2<-EtiquetesBolcades,e.eti=:=eti2) {} else EtiquetesBolcades=e.eti::EtiquetesBolcades;
+            }
+            Espai => {
+                //cout.PrintLn(pos, e.eti.nom," ESPAI ",e.mida);
+                e.eti.Instanciar(pos);
+                pos=pos+e.mida;
+                Search (eti2<-EtiquetesBolcades,e.eti=:=eti2) {} else EtiquetesBolcades=e.eti::EtiquetesBolcades;
+            }
+            Comentari => {}
+            ComentariLinea => {}
+            ComentariIniciLinea => {}
+            Others=> throw Exception("Error en codi a bolcar: ",e);
+        }
+    }
+    //cout.PrintLn("==============================================");
+    //for (i<-0..10) cout.PrintLN(i,":",Memoria.Byte(i));
+}
+
+// =============================================================================
+// NormalitzarCodi =============================================================
+// =============================================================================
+
+Proc [public] NormalitzarCodi(cod:CodiEnGeneracio) =>
+{
+    //cout.PrintLn("==============================================");
+    Var q=Queue();
+    var cnt=1;
+    
+
+    for (e<-cod.Codi.GetList()) {
+        switch (e) {
+            char | int | real | String | Symbol | RefEtiqueta => {
+                q.Put(e);
+            }
+            DefEtiqueta => {
+                var eti=e.eti;
+                eti.nom=strprint("L",cnt);
+                ++cnt;
+                q.Put(e);
+            }
+            Espai => {
+                //cout.PrintLn(pos, e.eti.nom," ESPAI ",e.mida);
+                var eti=e.eti;
+                eti.nom=strprint("L",cnt);
+                ++cnt;
+                q.Put(e);
+            }
+            Comentari => {}
+            ComentariLinea => {}
+        }
+    }
+    cod.Codi=q;
+    //cout.PrintLn("==============================================");
+}
+
+// =============================================================================
+// REPRESENTACIO DE POSICIONS  =================================================
+// =============================================================================
+
+// posicio --> adreça --> calcul de la adreça
+// desp --> (0,desp) -->BP+desp (si nivell==0).
+// desp --> (nivel,desp) --> BP[4+4*nivell]+desp (si nivell!=0).
+// DespCamp(desp) --> (8,desp) --> BP[8]+desp (si nivell==0).
+// DespCamp(desp) --> cua d'instruccions --> (BP[4+4*nivell])[8]+desp (si nivell!=0).
+// RefParametre(desp) --> (desp,0) --> BP[desp] (si nivell==0).
+// RefParametre(desp) --> cua d'instruccions --> (BP[4+4*nivell])[desp] (si nivell!=0).
+// etiqueta --> RefEtiqueta(etiqueta) --> etiqueta.Valor
+
+Type [public,print=Contents] DespCamp(Desp)
+Type [public,print=Contents] RefParametre(Desp)
+
+// PosicioAAdreca ==============================================================
+
+Fun [public] PosicioAAdreca(posicio,nivell)=>
+{
+    switch (posicio) {
+        int => if (nivell==0) Vector(0,posicio) else Vector(4+nivell*4,posicio);
+        DespCamp => if (nivell==0) Vector(8,posicio.Desp) 
+                    else {
+                        var q=queue();
+                        q.Put(IPushDispVar,4,4+Nivell*4,8);
+                        if (posicio.Desp!=0) q.Put(
+                            IPushLit,4,posicio.Desp,
+                            IAddInt);
+                        q
+                    }
+        RefParametre=> if (nivell==0) Vector(posicio.Desp,0) 
+                    else {
+                        var q=queue();
+                        q.Put(IPushDispVar,4,4+Nivell*4,posicio.Desp);
+                        q
+                    }
+        Etiqueta=> RefEtiqueta(posicio);
+    }
+}
+
+// =============================================================================
+// REPRESENTACIO D'ADRECES =====================================================
+// =============================================================================
+
+// (0,desp) --> BP+desp
+// (nivell,desp) --> BP[nivell]+desp
+// StackAddress(desp) --> SP+desp
+// RefEtiqueta(etiqueta,desp) --> etiqueta.Valor+desp
+
+//Type [public,print=Contents] StackAddress(Desp);
+
+//Type [public] TipusAdreca=RefEtiqueta | Vector | StackAddress | AddressInStack | Queue;
+
+Fun [public] AdrecaAdd(adreca:TipusAdreca,increment:int)=>
+{
+    switch (adreca) {
+        RefEtiqueta=> RefEtiqueta(adreca.Eti,adreca.Desp+increment);
+        Vector=> (0,adreca[1]+increment);
+        Queue=> {
+            var q=queue();
+            q.PutElements(adreca);
+            q.Put(
+                IPushLit,4,increment,
+                IAddInt
+            );
+            q;
+        }
+    }
+}
+
+Fun [public] AdrecaAStr(adreca)=>
+{
+    switch (adreca) {
+        RefEtiqueta=> strPrint(adreca);
+        Vector=> strPrint(adreca);
+        StackAddress=> strPrint(adreca);
+        Queue=> strPrint("Codi adreca");
+        others=> strPrint("Adreca erronea: ",adreca);
+    }
+}
+
+
+
+// =============================================================================
+// VARIABLES DE GENERACION DE CODIGO ===========================================
+// =============================================================================
+
+var [public] CodiGlobal=CodiEnGeneracio();
+var [public] CodiInicialitzacioGlobal=CodiEnGeneracio();
+var [public] CodiDestruccioGlobal=CodiEnGeneracio();

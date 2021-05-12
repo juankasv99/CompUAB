@@ -15,23 +15,33 @@ proc SetOpcionesInformes(
 
 
 //load Sintactic
-load Semantic
-//load GenCod
+//load Semantic
+load GenCod
 
 Compila("LA MEVA PROVA DEL COMPILADOR",InStrStream("\{
 
+/*Function f(x:Integer,&y:Integer):Integer
+{
+	y=y+10;
+	return x+y;
+}*/
 
-    procedure main()
-    {
-        Var a=10+5;
-		PrintLn "a=",a;
-	}
-		
-    
-    
-
-
-  
+procedure main()
+{
+    /*var c:Integer;
+	c=100;
+	print f(50,c);*/
+	
+	Var a:Integer;
+	a=10+5;
+	Var b=30+a;
+	PrintLn a;
+	PrintLn b;
+	
+	Var c = 10.5;
+	PrintLn c;
+	
+}    
 \}"),true,false);
 
 GraficArbreSintactic();

@@ -1,0 +1,68 @@
+================================================================================
+INFORME OBLIGATORIO DE CORRECCION DE LA PRACTICA ===============================
+================================================================================
+Alumno.....: (Juan Carlos,Soriano Valle,1493037,0000000@uab.cat)
+Nombre.....: Juan Carlos
+Apellidos..: Soriano Valle
+NIA........: 1493037
+e-mail.....: 0000000@uab.cat
+
+-------------------------------------------------------------------------
+
+Fichero........: c:\tfg\Compiladors2021\Practicas\Generacio de Codi\1493037\GenCod.csl
+NIA Entrega....: 1493037
+Fecha..........: 10/5/2021
+Hora...........: 18:21
+Ampliaciones...: 
+    ArrayMultidimensional DeclaracionMultiplesVariablesMismoTipo
+    DeclaracionVariableAuto InstruccionBreak InstruccionCase InstruccionForElse
+    OperadorBoolBits
+
+Ver test de las ampliaciones...: 
+    InstruccionCase
+
+
+################################################################################
+###                  SINTACTICO OBLIGATORIO: TEST QUE FALLAN                 ###
+################################################################################
+
+################################################################################
+###                   SINTACTICO ADICIONAL: TEST QUE FALLAN                  ###
+################################################################################
+
+################################################################################
+###                  SEMANTICO OBLIGATORIO: TEST QUE FALLAN                  ###
+################################################################################
+
+################################################################################
+###                   SEMANTICO ADICIONAL: TEST QUE FALLAN                   ###
+################################################################################
+
+################################################################################
+###             GENERACION DE CODIGO OBLIGATORIO: TEST QUE FALLAN            ###
+################################################################################
+
+================================================================================
+RESUMEN OBLIGATORIO ============================================================
+================================================================================
+
+NOTAS NO VALIDAS POR RESTRINGIR LOS TEST A PROBAR
+
+Resultados sintactico ----------------------------------------------------------
+Test sintactico obligatorio OK............: 53 (100%) CORRECTO
+Test sintactico adicional OK..............: 9 (100%)
+NOTA SINTACTICO...........................: 10
+
+
+Resultados semantico -----------------------------------------------------------
+Test semantico obligatorio OK.............: 59 (100%) CORRECTO
+Test semantico adicional OK...............: 6 (100%)
+NOTA SEMANTICO............................: 10
+
+
+Resultados generacion de codigo ------------------------------------------------
+Test generación de código obligatorio OK..: 53 (100%) CORRECTO
+Test generación de código adicional OK....: 4 (100%)
+NOTA GENCOD...............................: 10
+
+

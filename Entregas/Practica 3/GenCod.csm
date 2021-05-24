@@ -902,8 +902,6 @@ Constructor [public] CodiEnGeneracio() from DescriptorValor() =>
     This(Queue(),unbound)
 }
 
-
-
 // CleanValue ==================================================================
 
 Proc [public] this:CodiEnGeneracio.CleanValue()=>

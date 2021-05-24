@@ -1,0 +1,95 @@
+================================================================================
+INFORME OBLIGATORIO DE CORRECCION DE LA PRACTICA ===============================
+================================================================================
+Alumno.....: (Juan Carlos,Soriano Valle,1493037,0000000@uab.cat)
+Nombre.....: Juan Carlos
+Apellidos..: Soriano Valle
+NIA........: 1493037
+e-mail.....: 0000000@uab.cat
+
+-------------------------------------------------------------------------
+
+Fichero........: c:\tfg\Compiladors2021\Practicas\Generacio de Codi\1493037\GenCod.csl
+NIA Entrega....: 1493037
+Fecha..........: 12/5/2021
+Hora...........: 11:13
+Ampliaciones...: 
+    ArrayMultidimensional DeclaracionMultiplesVariablesMismoTipo
+    DeclaracionVariableAuto InstruccionBreak InstruccionCase InstruccionForElse
+    OperadorBoolBits
+
+Ver test de las ampliaciones...: 
+    DeclaracionVariableAuto
+
+
+################################################################################
+###                  SINTACTICO OBLIGATORIO: TEST QUE FALLAN                 ###
+################################################################################
+
+################################################################################
+###                   SINTACTICO ADICIONAL: TEST QUE FALLAN                  ###
+################################################################################
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoDeclaracionVariableAutoErrorSintactico3 OPCIONAL
+DESCRIPCION: Error declaración de variables sin tipo de datos
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        Var a,b=10;
+/*  4*/        PrintLn "a=",a;
+/*  5*/        PrintLn "b=",b;
+/*  6*/        PrintLn "&a-&b=", &a-&b;
+/*  7*/    }
+/*  8*/    
+--------------------------------------------------------
+Analitzant SintacticoDeclaracionVariableAutoErrorSintactico3
+=====================================================================
+TEMPS D'EXECUCIO
+
+Execució sense errors
+=====================================================================
+TEST SintacticoDeclaracionVariableAutoErrorSintactico3 <<<FALLA>>> Unbound (3,3)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+################################################################################
+###                  SEMANTICO OBLIGATORIO: TEST QUE FALLAN                  ###
+################################################################################
+
+################################################################################
+###                   SEMANTICO ADICIONAL: TEST QUE FALLAN                   ###
+################################################################################
+
+################################################################################
+###             GENERACION DE CODIGO OBLIGATORIO: TEST QUE FALLAN            ###
+################################################################################
+
+================================================================================
+RESUMEN OBLIGATORIO ============================================================
+================================================================================
+
+NOTAS NO VALIDAS POR RESTRINGIR LOS TEST A PROBAR
+
+Resultados sintactico ----------------------------------------------------------
+Test sintactico obligatorio OK............: 50 (100%) CORRECTO
+Test sintactico adicional OK..............: 7 (87.5%)
+NOTA SINTACTICO...........................: 9.375
+
+TEST ADICIONALES QUE FALLAN (1):
+    SintacticoDeclaracionVariableAutoErrorSintactico3
+
+Resultados semantico -----------------------------------------------------------
+Test semantico obligatorio OK.............: 58 (100%) CORRECTO
+Test semantico adicional OK...............: 9 (100%)
+NOTA SEMANTICO............................: 10
+
+TEST ADICIONALES QUE FALLAN (0):
+
+
+Resultados generacion de codigo ------------------------------------------------
+Test generación de código obligatorio OK..: 52 (100%) CORRECTO
+Test generación de código adicional OK....: 3 (60%)
+NOTA GENCOD...............................: 8
+
+

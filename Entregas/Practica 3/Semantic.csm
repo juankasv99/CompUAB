@@ -48,11 +48,6 @@ Type [public,Print=Contents] TSSeparadorBucle(
         Repetir, // Etiqueta per repetir el bucle
         Sortida // Etiqueta a la sortida del bucle
     ) from TSSeparador;
-	
-Type [public,Print=Contents] TSSeparadorBreakable (
-	Entrada, //Etiqueta per anar a la següent iteració d'un bucle
-	Sortida // Etiqueta a la sortida del bucle/switch
-	) from TSSeparador;
 
 // =============================================================================
 // Entrades taule de símbols ===================================================
@@ -726,13 +721,6 @@ Fun [public] classe:TClasse.BuscarPrototipus(metode:ETSFuncio)=>
 // Taula de Símbols ============================================================
 // =============================================================================
 
-// Ambit trencable
-Proc [public] ts:TaulaSimbols.NouAmbitBreakable(Entrada,Sortida)=>
-	ts.Pila=TSSeparadorBreakable(Entrada,Sortida)::ts.Pila;
-
-
-
-
 Fun [public] ts:TaulaSimbols.StringETSFuncio(Ets:ETSFuncio);
 
 // ComprovarDuplicat ===========================================================
@@ -1106,8 +1094,6 @@ Proc [public] ts:TaulaSimbols.EliminarAmbit()=>
     }
     ts.Pila=p.Tail;
 }
-
-
 
 // =============================================================================
 // IMPRIMIR TAULA DE SIMBOLS ===================================================

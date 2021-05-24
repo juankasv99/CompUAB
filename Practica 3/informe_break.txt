@@ -1,0 +1,383 @@
+================================================================================
+INFORME OBLIGATORIO DE CORRECCION DE LA PRACTICA ===============================
+================================================================================
+Alumno.....: (Juan Carlos,Soriano Valle,1493037,0000000@uab.cat)
+Nombre.....: Juan Carlos
+Apellidos..: Soriano Valle
+NIA........: 1493037
+e-mail.....: 0000000@uab.cat
+
+-------------------------------------------------------------------------
+
+Fichero........: c:\tfg\Compiladors2021\Practicas\Generacio de Codi\1493037\GenCod.csl
+NIA Entrega....: 1493037
+Fecha..........: 23/5/2021
+Hora...........: 14:12
+Ampliaciones...: 
+    ArrayMultidimensional DeclaracionMultiplesVariablesMismoTipo
+    DeclaracionVariableAuto InstruccionBreak InstruccionCase InstruccionForElse
+    OperadorBoolBits
+
+Ver test de las ampliaciones...: 
+    InstruccionBreak
+
+
+################################################################################
+###                  SINTACTICO OBLIGATORIO: TEST QUE FALLAN                 ###
+################################################################################
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoInstruccionBreakSimple1 OBLIGATORIO
+DESCRIPCION: Verifica el funcionamiento básico de la instruccion break
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var i:integer;
+/*  4*/        i=0; 
+/*  5*/        while i<10 do {
+/*  6*/            if i>5 then break;
+/*  7*/            PrintLn "i=",i;
+/*  8*/            i=i+1;                
+/*  9*/        }
+/* 10*/    }
+/* 11*/    
+--------------------------------------------------------
+Analitzant SintacticoInstruccionBreakSimple1
+Error a la linea 6 del fitxer SintacticoInstruccionBreakSimple1
+				if i>5 then break
+				            ^ Recursió infinita detectada (401)
+Call stack:
+0119C609: Constructor BackTrace(n:#Int)
+011983EF: Constructor Exception(Args...)
+0129CD1F: Proc PARSER_instruccio(cod:CodiEnGeneracio)
+012A5C5D: Proc PARSER_bloc(cod:CodiEnGeneracio)
+012A29E2: Proc PARSER_instruccio(cod:CodiEnGeneracio)
+0129E9B7: Proc PARSER_instruccio(cod:CodiEnGeneracio)
+012A5C5D: Proc PARSER_bloc(cod:CodiEnGeneracio)
+012A6D31: Proc PARSER_DecProc()
+012B4121: Proc PARSER_programa()
+012B4DBA: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+
+TEST SintacticoInstruccionBreakSimple1 <<<FALLA>>> 6 (Unbound,Unbound)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoInstruccionBreakSimple2 OBLIGATORIO
+DESCRIPCION: Verifica el funcionamiento básico de la instruccion break
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var i:integer;
+/*  4*/        i=0; 
+/*  5*/        printLn "Antes";
+/*  6*/        while i<10 do break;
+/*  7*/        printLn "Despues";
+/*  8*/    }
+/*  9*/    
+--------------------------------------------------------
+Analitzant SintacticoInstruccionBreakSimple2
+Error a la linea 6 del fitxer SintacticoInstruccionBreakSimple2
+			while i<10 do break
+			              ^ Bucle no trobat per sortir amb break
+Call stack:
+0119C609: Constructor BackTrace(n:#Int)
+011983EF: Constructor Exception(Args...)
+01188667: Constructor SemanticError(Args...)
+012A10FC: Proc PARSER_instruccio(cod:CodiEnGeneracio)
+012A5C5D: Proc PARSER_bloc(cod:CodiEnGeneracio)
+012A6D31: Proc PARSER_DecProc()
+012B4121: Proc PARSER_programa()
+012B4DBA: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+01252D15: Proc TestSintactico(Nombre:Whole,extensions:Whole,descripcion:Whole,Keywords:Whole,Obligatorio:Whole,fuente:Whole,LineaError1:Whole,LineaError2:Whole,SemanticError:Whole,SubTest:Whole)
+01255C2D: Proc TestCombinado(Nombre:Whole,extensions:Whole,descripcion:Whole,Keywords:Whole,Obligatorio:Whole,fuente:Whole,Tabla:Whole,IgnorarSeparadorDeBucle:Whole,output:Whole,Code:Whole)
+
+TEST SintacticoInstruccionBreakSimple2 <<<FALLA>>> 6 (Unbound,Unbound)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+################################################################################
+###                   SINTACTICO ADICIONAL: TEST QUE FALLAN                  ###
+################################################################################
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoInstruccionBreakErrorSintactico1 OPCIONAL
+DESCRIPCION: Verifica que se detectan correctamente errores sintácticos en break
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var i:integer;
+/*  4*/        i=0; 
+/*  5*/        while i<10 do {
+/*  6*/            if i>5 then break
+/*  7*/            PrintLn "i=",i;
+/*  8*/            i=i+1;                
+/*  9*/        }
+/* 10*/    }
+/* 11*/    
+/* 12*/    
+--------------------------------------------------------
+Analitzant SintacticoInstruccionBreakErrorSintactico1
+Error a la linea 6 del fitxer SintacticoInstruccionBreakErrorSintactico1
+				if i>5 then break
+				            ^ Recursió infinita detectada (401)
+Call stack:
+0119C609: Constructor BackTrace(n:#Int)
+011983EF: Constructor Exception(Args...)
+0129CD1F: Proc PARSER_instruccio(cod:CodiEnGeneracio)
+012A5C5D: Proc PARSER_bloc(cod:CodiEnGeneracio)
+012A29E2: Proc PARSER_instruccio(cod:CodiEnGeneracio)
+0129E9B7: Proc PARSER_instruccio(cod:CodiEnGeneracio)
+012A5C5D: Proc PARSER_bloc(cod:CodiEnGeneracio)
+012A6D31: Proc PARSER_DecProc()
+012B4121: Proc PARSER_programa()
+012B4DBA: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+
+TEST SintacticoInstruccionBreakErrorSintactico1 <<<FALLA>>> 6 (7,7)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoInstruccionBreakErrorSintactico4 OPCIONAL
+DESCRIPCION: Verifica que se detectan correctamente errores sintácticos en break
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    break;
+/*  2*/    procedure main()
+/*  3*/    {
+/*  4*/    }
+/*  5*/    
+/*  6*/    
+--------------------------------------------------------
+Analitzant SintacticoInstruccionBreakErrorSintactico4
+Error a la linea 1 del fitxer SintacticoInstruccionBreakErrorSintactico4
+		break
+		^ main no declarat
+Call stack:
+0119C609: Constructor BackTrace(n:#Int)
+011983EF: Constructor Exception(Args...)
+01188667: Constructor SemanticError(Args...)
+01227F2B: Fun ts:TaulaSimbols.Buscar(nom:String)
+012B457F: Proc PARSER_programa()
+012B4DBA: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+01252D15: Proc TestSintactico(Nombre:Whole,extensions:Whole,descripcion:Whole,Keywords:Whole,Obligatorio:Whole,fuente:Whole,LineaError1:Whole,LineaError2:Whole,SemanticError:Whole,SubTest:Whole)
+01187369: Proc LoadFile(FileName:String)
+01187369: Proc LoadFile(FileName:String)
+00968A9E: Fun Start()
+
+TEST SintacticoInstruccionBreakErrorSintactico4 <<<FALLA>>> 1 (1,1)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+################################################################################
+###                  SEMANTICO OBLIGATORIO: TEST QUE FALLAN                  ###
+################################################################################
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SEMANTICO SemanticoInstruccionBreakSimple1 OBLIGATORIO
+DESCRIPCION: Verifica el funcionamiento básico de la instruccion break
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var i:integer;
+/*  4*/        i=0; 
+/*  5*/        while i<10 do {
+/*  6*/            if i>5 then break;
+/*  7*/            PrintLn "i=",i;
+/*  8*/            i=i+1;                
+/*  9*/        }
+/* 10*/    }
+/* 11*/    
+--------------------------------------------------------
+Analitzant SemanticoInstruccionBreakSimple1
+Error a la linea 6 del fitxer SemanticoInstruccionBreakSimple1
+				if i>5 then break
+				            ^ Recursió infinita detectada (401)
+Call stack:
+0119C609: Constructor BackTrace(n:#Int)
+011983EF: Constructor Exception(Args...)
+0129CD1F: Proc PARSER_instruccio(cod:CodiEnGeneracio)
+012A5C5D: Proc PARSER_bloc(cod:CodiEnGeneracio)
+012A29E2: Proc PARSER_instruccio(cod:CodiEnGeneracio)
+0129E9B7: Proc PARSER_instruccio(cod:CodiEnGeneracio)
+012A5C5D: Proc PARSER_bloc(cod:CodiEnGeneracio)
+012A6D31: Proc PARSER_DecProc()
+012B4121: Proc PARSER_programa()
+012B4DBA: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+
+TEST SemanticoInstruccionBreakSimple1 <<<FALLA>>> 6 (Unbound,Unbound)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SEMANTICO SemanticoInstruccionBreakSimple2 OBLIGATORIO
+DESCRIPCION: Verifica el funcionamiento básico de la instruccion break
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var i:integer;
+/*  4*/        i=0; 
+/*  5*/        printLn "Antes";
+/*  6*/        while i<10 do break;
+/*  7*/        printLn "Despues";
+/*  8*/    }
+/*  9*/    
+--------------------------------------------------------
+Analitzant SemanticoInstruccionBreakSimple2
+Error a la linea 6 del fitxer SemanticoInstruccionBreakSimple2
+			while i<10 do break
+			              ^ Bucle no trobat per sortir amb break
+Call stack:
+0119C609: Constructor BackTrace(n:#Int)
+011983EF: Constructor Exception(Args...)
+01188667: Constructor SemanticError(Args...)
+012A10FC: Proc PARSER_instruccio(cod:CodiEnGeneracio)
+012A5C5D: Proc PARSER_bloc(cod:CodiEnGeneracio)
+012A6D31: Proc PARSER_DecProc()
+012B4121: Proc PARSER_programa()
+012B4DBA: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+01253BF5: Proc TestSemantico(Nombre:Whole,extensions:Whole,descripcion:Whole,Keywords:Whole,Obligatorio:Whole,fuente:Whole,IgnorarSeparadorDeBucle:Whole,Tabla:Whole,LineaError1:Whole,LineaError2:Whole)
+01255C70: Proc TestCombinado(Nombre:Whole,extensions:Whole,descripcion:Whole,Keywords:Whole,Obligatorio:Whole,fuente:Whole,Tabla:Whole,IgnorarSeparadorDeBucle:Whole,output:Whole,Code:Whole)
+
+TEST SemanticoInstruccionBreakSimple2 <<<FALLA>>> 6 (Unbound,Unbound)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+################################################################################
+###                   SEMANTICO ADICIONAL: TEST QUE FALLAN                   ###
+################################################################################
+
+################################################################################
+###             GENERACION DE CODIGO OBLIGATORIO: TEST QUE FALLAN            ###
+################################################################################
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST DE GENERACION DE CODIGO GenCodInstruccionBreakSimple1 OBLIGATORIO
+DESCRIPCION: Verifica el funcionamiento básico de la instruccion break
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var i:integer;
+/*  4*/        i=0; 
+/*  5*/        while i<10 do {
+/*  6*/            if i>5 then break;
+/*  7*/            PrintLn "i=",i;
+/*  8*/            i=i+1;                
+/*  9*/        }
+/* 10*/    }
+/* 11*/    
+--------------------------------------------------------
+Analitzant GenCodInstruccionBreakSimple1
+Error a la linea 6 del fitxer GenCodInstruccionBreakSimple1
+				if i>5 then break
+				            ^ Recursió infinita detectada (401)
+Call stack:
+0119C609: Constructor BackTrace(n:#Int)
+011983EF: Constructor Exception(Args...)
+0129CD1F: Proc PARSER_instruccio(cod:CodiEnGeneracio)
+012A5C5D: Proc PARSER_bloc(cod:CodiEnGeneracio)
+012A29E2: Proc PARSER_instruccio(cod:CodiEnGeneracio)
+0129E9B7: Proc PARSER_instruccio(cod:CodiEnGeneracio)
+012A5C5D: Proc PARSER_bloc(cod:CodiEnGeneracio)
+012A6D31: Proc PARSER_DecProc()
+012B4121: Proc PARSER_programa()
+012B4DBA: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+
+Error en la salida del programa:
+Salida correcta: 
+    i=0
+    i=1
+    i=2
+    i=3
+    i=4
+    i=5
+    
+Salida practica: 
+    
+CODIGO GENERADO POR LA PRACTICA:
+--------------------------------
+=====================================================================
+=====================================================================
+TEST GenCodInstruccionBreakSimple1 <<<FALLA>>> 6
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST DE GENERACION DE CODIGO GenCodInstruccionBreakSimple2 OBLIGATORIO
+DESCRIPCION: Verifica el funcionamiento básico de la instruccion break
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var i:integer;
+/*  4*/        i=0; 
+/*  5*/        printLn "Antes";
+/*  6*/        while i<10 do break;
+/*  7*/        printLn "Despues";
+/*  8*/    }
+/*  9*/    
+--------------------------------------------------------
+Analitzant GenCodInstruccionBreakSimple2
+Error a la linea 6 del fitxer GenCodInstruccionBreakSimple2
+			while i<10 do break
+			              ^ Bucle no trobat per sortir amb break
+Call stack:
+0119C609: Constructor BackTrace(n:#Int)
+011983EF: Constructor Exception(Args...)
+01188667: Constructor SemanticError(Args...)
+012A10FC: Proc PARSER_instruccio(cod:CodiEnGeneracio)
+012A5C5D: Proc PARSER_bloc(cod:CodiEnGeneracio)
+012A6D31: Proc PARSER_DecProc()
+012B4121: Proc PARSER_programa()
+012B4DBA: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+01254C64: Proc TestGenCod(Nombre:Whole,extensions:Whole,descripcion:Whole,Keywords:Whole,Obligatorio:Whole,fuente:Whole,output:Whole,Code:Whole)
+01187369: Proc LoadFile(FileName:String)
+
+Error en la salida del programa:
+Salida correcta: 
+    Antes
+    Despues
+    
+Salida practica: 
+    
+CODIGO GENERADO POR LA PRACTICA:
+--------------------------------
+=====================================================================
+=====================================================================
+TEST GenCodInstruccionBreakSimple2 <<<FALLA>>> 6
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+================================================================================
+RESUMEN OBLIGATORIO ============================================================
+================================================================================
+
+NOTAS NO VALIDAS POR RESTRINGIR LOS TEST A PROBAR
+
+Resultados sintactico ----------------------------------------------------------
+Test sintactico obligatorio OK............: 48 (96%) <<<FALLA>>>
+Test sintactico adicional OK..............: 2 (50%)
+NOTA SINTACTICO...........................: 0
+TEST OBLIGATORIOS QUE FALLAN (2):
+    SintacticoInstruccionBreakSimple1 SintacticoInstruccionBreakSimple2
+
+TEST ADICIONALES QUE FALLAN (2):
+    SintacticoInstruccionBreakErrorSintactico1
+    SintacticoInstruccionBreakErrorSintactico4
+
+Resultados semantico -----------------------------------------------------------
+Test semantico obligatorio OK.............: 56 (96.5517%) <<<FALLA>>>
+Test semantico adicional OK...............: 3 (100%)
+NOTA SEMANTICO............................: 0
+TEST OBLIGATORIOS QUE FALLAN (2):
+    SemanticoInstruccionBreakSimple1 SemanticoInstruccionBreakSimple2
+
+TEST ADICIONALES QUE FALLAN (0):
+
+
+Resultados generacion de codigo ------------------------------------------------
+Test generación de código obligatorio OK..: 50 (96.1538%) <<<FALLA>>>
+Test generación de código adicional OK....: 0 (100%)
+NOTA GENCOD...............................: 0
+TEST OBLIGATORIOS QUE FALLAN (2):
+    GenCodInstruccionBreakSimple1 GenCodInstruccionBreakSimple2
+
+

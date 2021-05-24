@@ -32,18 +32,15 @@ procedure main()
 	c=100;
 	print f(50,c);*/
 	
-	var i:integer;
-	i=0;
-	while i<10 do {
-		if i>5 then break;
-		PrintLn "i=",i;
-		i=i+1;
-		IMPRIMIR_TAULA_DE_SIMBOLS;
-	}
-
+	Var a:Integer;
+	a=10+5;
+	Var b=30+a;
+	PrintLn a;
+	PrintLn b;
 	
+	Var c = 10.5;
+	PrintLn c;
 	
-	IMPRIMIR_TAULA_DE_SIMBOLS;
 }    
 \}"),true,false);
 

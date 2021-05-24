@@ -1,0 +1,900 @@
+// =============================================================================
+// GENERADOR DE CODI DE LOOS ===================================================
+// =============================================================================
+/*
+================================================================================
+Conceptes:
+Posicio:
+    - Etiqueta
+    - Int (b+desp)
+    - DespCamp(Desp)
+    - RefParametre(Desp)
+    
+Adreca:
+    - RefEtiqueta
+    - vector
+    - queue
+    - AdrecaAPila
+================================================================================
+*/
+
+use COM
+use semantic
+use GenCod
+use queue
+
+// =============================================================================
+// Identificació dels alumnes del grup =========================================
+// =============================================================================
+
+SetComponentsGrup([
+    // Una linea per alumne amb el format "nom","cognoms","nia","e-mail")
+   ("nom","cognoms","1000000","0000000@uab.cat")
+])
+
+// =============================================================================
+// Opciones Informes ===========================================================
+// =============================================================================
+
+SetOpcionesInformes(
+    VerSintactico=>true,
+    VerSemantico=>true,
+    VerGenCod=>false,
+    VerObligatorio=>true,
+    VerAdicional=>true,
+    VerCorrecto=>false,
+	//VerExtensions=>["DeclaracionVariableAuto", "VarInitSimple", "DeclaracionMultiplesVariablesMismoTipo", "DeclaracionMultiplesVariablesDiferenteTipo"]
+	VerExtensions=>["InstruccionForElse", "InstruccionBreak", "InstruccionContinue"]
+	//VerExtensions=>unbound
+); 
+
+// =============================================================================
+// PARAMETRES ==================================================================
+// =============================================================================
+
+proc ComprovarPermisosParametres(dvParametres:List,Parametres:List)=>
+{
+    for (dvp<-reverse(dvParametres),p<-reverse(Parametres)) {
+        if (p.Referencia && !dvp.PermisEscriptura) throw Exception("No es pot escriure parametre per referencia ", p.Nom);
+    }
+}
+
+// ================================================================================
+// CONSTRUCCIO OBJECTES ===========================================================
+// ================================================================================
+
+// ComprovarConstruible =========================================================
+
+Proc t:TipusDeDades.ComprovarConstruible(dvParametres)=>
+{
+    var Constructors=t.Constructors();
+    if (Constructors==[]) {
+        if (dvParametres==[]) return; // No hi ha construcció
+        if (dvParametres.Length>1) throw SemanticError("No hi ha constructor pel tipus de dades ",t," amb ", dvParametres.Length," parametres");
+        if (!TipusElementP(dvParametres.Head.Tipus,t)) throw SemanticError("No hi ha constructor pel tipus de dades ",t," amb ", dvParametres.Head.Tipus);
+   }
+    else {
+        var etsConstructor=SeleccionarMetode(Constructors,dvParametres);        
+        ComprovarPermisosParametres(dvParametres,etsConstructor.Parametres);
+    }
+}
+
+// GRAMATICA ===================================================================
+
+Proc Compila(FileName:String,St=Unbound,VeureCodiGenerat=false,VeureCodiExecucio=false)=>
+{
+    ParserErrorNLin=Unbound;
+    ParserErrorLine=Unbound;
+    ParserErrorNCol=Unbound;
+    ParserErrorException=unbound;
+    Var OldScanInput=ScanInput;
+    if (TypeP(stream,St)) ScanInput=St;
+    else ScanInput=Open(FileName,SMIn,[],SourcePaths);
+    cout.PrintLN("--------------------------------------------------------");
+    cout.PrintLN("Analitzant ",FileName);
+    cout.flush();
+    Var Oldline=system$CSLGetScanLineNumber();
+    Var OldNLin=system$CSLGetParserLineNumber();
+    system$CSLSetScanLineNumber(1);
+    SortidaSemantic=OutStrStream();
+    TRY {
+    BNF_PARSER <programa()>
+    TERMINALS
+        + - * / identificador numero caracter string ( ) =
+        == != > < >= <= ^
+        ! && || 
+        , ; : . & "::"
+        Type var Const Function Procedure constructor destructor
+        Integer Real Character bool class array of "[" "]" "{" "}"
+        if then else while do return
+        Print PrintLn Exit
+        delete new
+        true false null this operator
+        IMPRIMIR_TAULA_DE_SIMBOLS
+    BNF
+    // <Programa> ==============================================================
+    Rule <programa>::=
+        @TS=TaulaSimbols();
+        {
+            <DecFun>
+            | <DecProc>
+            | <DecConstructor>
+            | <DecDestructor>
+            | <DecVar>
+            | <DecTipus>
+            | <DecClasse>
+            | IMPRIMIR_TAULA_DE_SIMBOLS ";" @ts.Imprimir(); @ts.ImprimirSemantic(SortidaSemantic);
+        }
+        @{
+            Var EtssMain=TS.Buscar("main");
+            if (!-](EtsMain<-EtssMain,TypeP(ETSFuncio,EtsMain) && EtsMain.TipusRetorn=:=TVoid && EtsMain.Parametres==[])) 
+                throw SemanticError("Falta declarar el procediment Main o se ha declarado incorrectamente");
+        }
+        
+    // <DecTipus> ==============================================================
+    Rule <DecTipus>::= @var nom,ets;
+        "Type" identificador#(nom)
+        @TS.ComprovarDuplicat(nom);
+        @ets=ETSTipus(nom,Unbound);
+        @TS.Insertar(ets);
+        = <tipus(ets.Tipus,nom)> ";"
+        
+    // <Tipus> =================================================================
+    Rule <tipus(&t,NomRec)>::=
+        (
+            Integer @t=TInt;
+            | Real @t=TReal;
+            | Character @t=TChar;
+            | Bool @t=TBool;
+            | @t=TApuntador(Unbound);
+              ^ <tipus(t.TipusBase,Unbound)>
+            | @var sz;
+              Array "[" 
+              numero#(sz)
+              @if (!TypeP(Int,sz)) throw SemanticError("Mida d'array errònia");       
+              @if (sz<=0) throw SemanticError("Mida d'array errònia");
+              "]" of
+              @t=TArray(sz,Unbound);
+              <tipus(t.TipusElements,NomRec)>
+            | @var nom;
+              identificador#(nom)
+               @{
+                   var ets=TS.Buscar(nom).Head;
+                   if (!TypeP(ETSTipus,ets))
+                        throw SemanticError(nom," no és un tipus de dades");
+                   if (ets.Nom==NomRec)
+                        throw SemanticError("Declaració recursiva del tipus de dades ",nom);
+                   t=ets.Tipus;
+               }
+        )
+        @AssociarAtribut("Tipus=",TS.NomTipus(t));
+
+    // <DecClasse> =============================================================
+    Rule <DecClasse>::=@var nom,base=TVoid;      
+        "Class" Identificador#(nom)
+        @TS.ComprovarDuplicat(nom);
+        [
+            @var nomBase;
+            ":" Identificador#(nomBase) 
+            @base=TS.BuscarClasse(nomBase);
+        ]
+        @var classe=TClasse(base);
+        @var ets=ETSTipus(nom,classe);
+        @TS.Insertar(ets);
+        @TS.NouAmbit(ets.Tipus);
+        "{" { <ElementClasse(classe,nom)> } "}"
+        @TS.EliminarAmbit();
+        @{
+            classe.membres=reverse(classe.membres);
+            // CREACIO PER COMPATIBILITAT AMB EL CORRECTOR DE GENERACIO DE CODI
+            // NO NECESSARI PER SEMANTIC
+            // Creación del constructor por defecto i per copia ----------------
+            var ETSCreades=[];
+            if (classe.Constructors()=:=[]) {
+                if ((classe.Base.Constructors()!:=[]) ||
+                    -](ets<-classe.membres,
+                    TypeP(ETSVariable,ets),
+                    ets.Tipus.Constructors()!:=[])) {
+                    // Crear el constructor per defecte
+                    try {
+                        classe.ComprovarConstruiblePerDefecte();
+                        var ETSConstructor=ETSFuncio(TFConstructor,nom,classe,[],TVoid);
+                        ETSConstructor.TeCos=true;
+                        ETSCreades=ETSConstructor::ETSCreades;
+                    }
+                    catch (ex) {}
+                    // Crear el constructor per copia
+                    try {
+                        classe.ComprovarConstruiblePerCopia();
+                        var ETSConstructor=ETSFuncio(TFConstructor,nom,classe,[Parametre("Font",classe,true,false,false)],TVoid);
+                        ETSConstructor.TeCos=true;
+                        ETSCreades=ETSConstructor::ETSCreades;
+                    }
+                    catch (ex) {}
+                }
+            }
+            // Crear assignador per defecte ------------------------------------
+            if (classe.Constructors()=:=[]) {                
+                if (classe.Base.AssignadorDefinitP() || 
+                    -](ets<-classe.membres, TypeP(ETSVariable,ets), ets.Tipus.AssignadorDefinitP())) {
+                    // Crear el assignador 
+                    try {
+                        classe.ComprovarAssignable();
+                        var ETSAsignador=ETSFuncio(TFProcediment,"operator=",classe,[Parametre("Font",classe,true,false,false)],TVoid);
+                        ETSCreades=ETSAsignador::ETSCreades;
+                        ETSAsignador.TeCos=true;
+                        //classe.Insertar(ETSAsignador);        
+                    }
+                    catch (ex) {}
+                }
+            }
+            for (ets<-reverse(ETSCreades)) classe.Insertar(ets);
+            // Crear destructor por defecto ------------------------------------
+            if (classe.Destructor()=:=unbound) {
+                if (-](ets<-classe.membres,
+                    TypeP(ETSVariable,ets),
+                    ets.Tipus.TipusDelsElements().Destructor()!:=unbound)) {
+                    // Crear el destructor dels camps
+                    var ETSDestructor=ETSFuncio(TFDestructor,nom,classe,[],TVoid);
+                    ETSDestructor.TeCos=true;
+                    classe.Insertar(ETSDestructor);        
+                }
+            }
+        }
+
+    // <ElementClasse> =========================================================
+    Rule <ElementClasse(classe:TClasse,nomRec)>::= 
+        // Camp ----------------------------------------------------------------
+        @var nom,t;
+        identificador#(nom) 
+        @classe.ComprovarDuplicat(nom);
+        : <tipus(t,nomRec)> ";" 
+        @classe.Insertar(ETSVariable(nom,t));        
+        |
+        // Funcio --------------------------------------------------------------
+        @var nom,ClasseBase=classe,parametres,retorn;
+        <PrototipusFuncio(nom,ClasseBase,parametres,retorn)> ";"
+        @if (classe!:=ClasseBase) throw SemanticError("No se puede cambiar la clase a la que pertenece un método");
+        @var ets=ETSFuncio(TFFuncio,nom,ClasseBase,Parametres,retorn);
+        @classe.ComprovarDuplicat(ets);
+        @classe.Insertar(ets);        
+
+        |
+        // Procedure -----------------------------------------------------------
+        @var nom,ClasseBase=classe,parametres;
+        <PrototipusProcediment(nom,ClasseBase,parametres)> ";"
+        @if (classe!:=ClasseBase) throw SemanticError("No se puede cambiar la clase a la que pertenece un método");
+        @var ets=ETSFuncio(TFProcediment,nom,ClasseBase,Parametres,TVoid);
+        @classe.ComprovarDuplicat(ets);
+        @classe.Insertar(ets);        
+        
+        | 
+        // Constructor ---------------------------------------------------------
+        @var nom,parametres;
+        <PrototipusConstructor(nom,parametres)> ";"
+        @if (TS.BuscarClasse(nom)!:=classe) throw SemanticError("No se puede cambiar la clase a la que pertenece un constructor");
+        @var ets=ETSFuncio(TFConstructor,nom,classe,Parametres,TVoid);
+        @classe.ComprovarDuplicat(ets);
+        @classe.Insertar(ets);        
+
+        |
+        // Destructor ----------------------------------------------------------
+        @var nom;
+        <PrototipusDestructor(nom)> ";"
+        @if (TS.BuscarClasse(nom)!:=classe) throw SemanticError("No se puede cambiar la clase a la que pertenece un destructor");
+        @var ets=ETSFuncio(TFDestructor,nom,classe,[],TVoid);
+        @classe.ComprovarDuplicat(ets);
+        @classe.Insertar(ets);        
+
+    // <PrototipusFuncio> ======================================================
+    Rule <PrototipusFuncio(&nom,&ClasseBase,&parametres,&retorn)>::= 
+        function identificador#(nom) 
+        [
+            @ClasseBase=TS.BuscarClasse(nom); 
+            "::" identificador#(nom)
+        ]
+        <DecParametres(parametres)> ":" <Tipus(retorn,unbound)>
+        
+    // <PrototipusProcediment> =================================================
+    Rule <PrototipusProcediment(&nom,&ClasseBase,&parametres)>::= 
+        procedure 
+        (
+            identificador#(nom)
+            [  
+               @ClasseBase=TS.BuscarClasse(nom); 
+               "::" 
+               (
+                   identificador#(nom) |
+                   operator = @nom="operator=";
+               )
+            ]
+            | 
+            operator = @nom="operator=";
+        )
+        <DecParametres(parametres)>
+                
+    // <PrototipusConstructor> =================================================
+    Rule <PrototipusConstructor(&nom,&parametres)>::= 
+        Constructor identificador#(nom) 
+        <DecParametres(parametres)>
+
+    // <PrototipusDestructor> ==================================================
+    Rule <PrototipusDestructor(&nom)>::= 
+        Destructor identificador#(nom) 
+        "(" ")"
+        
+    // <DecParametres> =========================================================
+    Rule <DecParametres(&LlistaParametres)>::=
+            @LlistaParametres=[];
+            "(" [
+                <DecParametre(LlistaParametres)>
+                { , <DecParametre(LlistaParametres)> }
+                ]")"
+            @LlistaParametres=reverse(LlistaParametres);
+
+    // <DecParametre> ==========================================================
+    Rule <DecParametre(&ListaParametres)>::=
+            @var nom, t, referencia=false;
+            [ & @referencia=true; ]
+            identificador#(nom) 
+            @if (-](p<-ListaParametres,p.nom==nom)) throw SemanticError("Parametre ",nom," duplicat");
+            : <tipus(t,Unbound)>
+			@if (!referencia) t.ComprovarConstruiblePerCopia();
+            @ListaParametres=Parametre(nom,t,referencia)::ListaParametres;
+
+   // <DecVar> =================================================================
+   
+    Rule <DecVar>::= @var nom,t;
+        Var identificador#(nom)
+        @TS.ComprovarDuplicat(nom);
+        : <tipus(t,Unbound)> 
+        @var DescriptorsParametres=[];
+        [<parametres(DescriptorsParametres)>]
+        @t.ComprovarConstruible(DescriptorsParametres);
+        @TS.Insertar(ETSVariable(nom,t));
+        ";"
+
+        
+    // <DecFun> ================================================================
+    Rule <DecFun>::= 
+        @var nom, classe=TVoid, parametres, tipusRetorn;
+        <PrototipusFuncio(nom,classe, parametres, tipusRetorn)>         
+        @{
+            var ets=ETSFuncio(TFFuncio,nom,classe,parametres,tipusRetorn);
+            if (classe=:=TVoid) {
+                TS.ComprovarDuplicat(ets);                
+                TS.Insertar(ets);
+            }
+            else ets=classe.BuscarPrototipus(ets);
+            if (ets.TeCos) throw SemanticError("Definició de funció duplicada");
+            ets.TeCos=true;
+            TS.NouAmbit(ets);
+            for (p<-parametres) TS.Insertar(ETSVariable(p.nom,p.tipus));
+        }
+        <bloc>
+        @TS.EliminarAmbit();
+
+    // <DecProc> ===============================================================
+    Rule <DecProc>::=
+        @var nom, classe=TVoid, parametres;
+        <PrototipusProcediment(nom,classe, parametres)>         
+        @{
+            var ets=ETSFuncio(TFProcediment,nom,classe,parametres,TVoid);
+            if (classe=:=TVoid) {
+                TS.ComprovarDuplicat(ets);
+                TS.Insertar(ets);
+            }
+            else ets=classe.BuscarPrototipus(ets);
+            if (ets.TeCos) throw SemanticError("Definició de procediment duplicat");
+            ets.TeCos=true;
+            TS.NouAmbit(ets);
+            for (p<-parametres) TS.Insertar(ETSVariable(p.nom,p.tipus));
+        }
+        <bloc>
+        @TS.EliminarAmbit();
+        
+    // <DecConstructor> ========================================================
+    Rule <DecConstructor>::= 
+        @var nom, parametres;
+        <PrototipusConstructor(nom,parametres)>         
+        @{
+            var ets=ETSFuncio(TFConstructor,nom,ts.BuscarClasse(nom),parametres,TVoid);
+            ets=ets.classe.BuscarPrototipus(ets);
+            if (ets.TeCos) throw SemanticError("Definició de constructor duplicat");
+            ets.TeCos=true;
+            TS.NouAmbit(ets);
+            for (p<-parametres) TS.Insertar(ETSVariable(p.nom,p.tipus));
+        }
+        <bloc>
+        @TS.EliminarAmbit();
+    
+    // <DecDestructor> =========================================================
+    Rule <DecDestructor>::=
+        @var nom;
+        <PrototipusDestructor(nom)>         
+        @{
+            var ets=ETSFuncio(TFDestructor,nom,ts.BuscarClasse(nom),[],TVoid);
+            ets=ets.classe.BuscarPrototipus(ets);
+            if (ets.TeCos) throw SemanticError("Definició de destructor duplicat");
+            ets.TeCos=true;
+            TS.NouAmbit(ets);
+        }
+        <bloc>
+        @TS.EliminarAmbit();
+
+    // <bloc> ==================================================================
+    Rule <bloc>::= 
+    "{"
+        @TS.NouAmbit();
+        {
+            <DecFun>
+            | <DecProc>
+            | <DecVar>
+            | <instruccio>
+        }
+        @TS.EliminarAmbit();
+    "}"
+
+    // <instruccio> ============================================================
+    Rule <instruccio>::=
+        // Expressió -----------------------------------------------------------
+        @var dvRes=DescriptorValor();
+        <Expressio(dvRes,false)> ";" 
+        |
+        // return --------------------------------------------------------------
+        @var dvRes=DescriptorValor();
+        return ( 
+            <Expressio(dvRes,true)>
+            @{
+                if (!TipusPertany(dvRes.Tipus,ts.Funcio.TipusRetorn)) Throw SemanticError("Error de tipus a return");
+                ts.Funcio.TipusRetorn.ComprovarConstruiblePerCopia();
+            }
+
+            | $ @if (ts.Funcio.TipusRetorn!:=TVoid) Throw SemanticError("Falta el valor de retorn a return");
+            ) ";"
+        |
+        // if ------------------------------------------------------------------
+        @var dvRes=DescriptorValor();
+        if <Expressio(dvRes,true)> 
+        @if (dvRes.Tipus!=TBool) throw SemanticError("Error de tipus en if");
+        then <instruccio> [ else <instruccio> ]
+        |
+        // while ---------------------------------------------------------------
+        @var dvRes=DescriptorValor();
+        while
+            <Expressio(dvRes,true)>
+            @if (dvRes.Tipus!=TBool) throw SemanticError("Error de tipus en while");
+        do <instruccio>
+        |
+        // Print ---------------------------------------------------------------
+        @var dvRes=DescriptorValor();
+        (Print | PrintLn)
+        [
+            <Expressio(dvRes,true)>
+            @switch (dvRes.Tipus) {
+                TBool  => {};
+                TChar  => {};
+                TInt   => {};
+                TReal  => {};
+                TArray => {
+                    if (dvRes.Tipus.TipusElements!:=TChar) {
+                        throw SemanticError("Tipus de dades erroni a print");
+                    }
+                }
+                TApuntador => {}
+                Others => throw SemanticError("Tipus de dades erroni a print");
+            };
+            {,<Expressio(dvRes,true)>
+                @switch (dvRes.Tipus) {
+                    TBool  => {};
+                    TChar  => {};
+                    TInt   => {};
+                    TReal  => {};
+                    TArray => {
+                        if (dvRes.Tipus.TipusElements!:=TChar) {
+                            throw SemanticError("Tipus de dades erroni a print");
+                        }
+                    }
+                    TApuntador => {};
+                    Others => throw SemanticError("Tipus de dades erroni a print");
+                };
+            }
+        ]
+        ";"
+
+        | 
+        // Exit ----------------------------------------------------------------
+        Exit ";"
+        
+        | 
+        // delete --------------------------------------------------------------
+        @var dvRes=DescriptorValor();
+        delete <expressio(dvRes,true)> ";"
+        @{
+            if (!TypeP(TApuntador,dvRes.Tipus)) throw SemanticError("Tipus erroni a delete");
+        }
+        |
+        // block { ...} --------------------------------------------------------
+        <Bloc>
+
+        |
+        // ; -------------------------------------------------------------------
+        ";"
+        |
+        // Imprimir taula de símbols -------------------------------------------
+        IMPRIMIR_TAULA_DE_SIMBOLS ";" 
+        @ts.Imprimir();
+        @ts.ImprimirSemantic(SortidaSemantic);
+
+    // <Expressio> =============================================================
+    Rule <Expressio(dvRes:DescriptorValor,Resultat:Bool)>::=
+        <TerBool(dvRes,Resultat)> {
+            "||" 
+            @if (!Resultat) throw SemanticError("No s'aprofita el resultat");
+            @if (dvRes.Tipus!:=TBool) throw SemanticError("Error de tipus de dades en || ",dvRes.Tipus);
+            <TerBool(dvRes,true)>
+            @if (dvRes.Tipus!:=TBool) throw SemanticError("Error de tipus de dades en || ",dvRes.Tipus);
+            @dvRes.SetRValue(TBool);
+        }
+        @AssociarAtribut("Resultat=",Resultat);
+        @dvRes.AssociarAtributs();
+
+    // <TerBool> ===============================================================
+    Rule <TerBool(dvRes:DescriptorValor,Resultat:Bool)>::=
+        <FacBool(dvRes,Resultat)> {
+            && 
+            @if (!Resultat) throw SemanticError("No s'aprofita el resultat");
+            @if (dvRes.Tipus!:=TBool) throw SemanticError("Error de tipus de dades en && ",dvRes.Tipus);
+            <FacBool(dvRes,true)>
+            @if (dvRes.Tipus!:=TBool) throw SemanticError("Error de tipus de dades en && ",dvRes.Tipus);
+            @dvRes.SetRValue(TBool);
+        }
+        @AssociarAtribut("Resultat=",Resultat);
+        @dvRes.AssociarAtributs();
+
+    // <FacBool> ===============================================================
+    Rule <FacBool(dvRes:DescriptorValor,Resultat:Bool)>::=
+        <ExpArit(dvRes,Resultat)> [
+            @if (!Resultat) throw SemanticError("No s'aprofita el resultat");
+            @var dvRes2=DescriptorValor();
+            (
+                ==
+                | !=
+                | ">"
+                | "<"
+                | >=
+                | <=
+            )
+            <ExpArit(dvRes2,true)>
+            @switch ((dvRes.Tipus,dvRes2.Tipus)) {
+                (TBool,TBool) => {}
+                (TChar,TChar) => {}
+                (TInt,TInt) => {}
+                (TInt,TReal) => {}
+                (TReal,TInt) => {}
+                (TReal,TReal) => {}
+                Others => {
+                    if (TypeP(TApuntador,dvRes.Tipus) && TypeP(TApuntador,dvRes2.Tipus) && TipusIguals(dvRes.Tipus,dvRes2.Tipus)) {}
+                    else throw SemanticError("Error de tipus de dades en comparacio ",(dvRes.Tipus,dvRes2.Tipus));
+                }
+            };
+            @dvRes.SetRValue(TBool);
+        ]
+        @AssociarAtribut("Resultat=",Resultat);
+        @dvRes.AssociarAtributs();
+
+    // <ExpArit> ===============================================================
+    Rule <ExpArit(dvRes:DescriptorValor,Resultat:Bool)>::=
+        <terme(dvRes,Resultat)> {
+            @if (!Resultat) throw SemanticError("No s'aprofita el resultat");
+            @var dvRes2=DescriptorValor(); 
+            (
+                + <terme(dvRes2,true)>
+                @switch ((dvRes.Tipus,dvRes2.Tipus)) {
+                    (TInt,TInt) => dvRes.SetRValue(TInt);
+                    (TInt,TReal) => dvRes.SetRValue(TReal);
+                    (TReal,TInt) => dvRes.SetRValue(TReal);
+                    (TReal,TReal) => dvRes.SetRValue(TReal);
+                    Others => throw SemanticError(
+                        "Error de tipus de dades en suma ",(dvRes.Tipus,dvRes2.Tipus));
+                };
+                | 
+                - <terme(dvRes2,true)>
+                @switch ((dvRes.Tipus,dvRes2.Tipus)) {
+                    (TInt,TInt) => dvRes.SetRValue(TInt);
+                    (TInt,TReal) => dvRes.SetRValue(TReal);
+                    (TReal,TInt) => dvRes.SetRValue(TReal);
+                    (TReal,TReal) => dvRes.SetRValue(TReal);
+                    Others =>{
+                        if (TypeP(TApuntador,dvRes.Tipus) && TypeP(TApuntador,dvRes2.Tipus)) dvRes.SetRValue(TInt);
+                        else throw SemanticError("Error de tipus de dades en resta ",(dvRes.Tipus,dvRes2.Tipus));
+                    }
+                };
+            )
+        }
+        @AssociarAtribut("Resultat=",Resultat);
+        @dvRes.AssociarAtributs();
+
+    // <Terme> =================================================================
+    Rule <terme(dvRes:DescriptorValor,Resultat:Bool)>::=
+        <factor(dvRes,Resultat)> {
+            @if (!Resultat) throw SemanticError("No s'aprofita el resultat");
+            @Var dvRes2=DescriptorValor(); 
+            (
+                * <factor(dvRes2,true)>
+                @switch ((dvRes.Tipus,dvRes2.Tipus)) {
+                    (TInt,TInt) => dvRes.SetRValue(TInt);
+                    (TInt,TReal) => dvRes.SetRValue(TReal);
+                    (TReal,TInt) => dvRes.SetRValue(TReal);
+                    (TReal,TReal) => dvRes.SetRValue(TReal);
+                    Others => throw SemanticError(
+                        "Error de tipus de dades en resta ",(dvRes.Tipus,dvRes2.Tipus));
+                };
+                | / <factor(dvRes2,true)>
+                @switch ((dvRes.Tipus,dvRes2.Tipus)) {
+                    (TInt,TInt) => dvRes.SetRValue(TReal);
+                    (TInt,TReal) => dvRes.SetRValue(TReal);
+                    (TReal,TInt) => dvRes.SetRValue(TReal);
+                    (TReal,TReal) => dvRes.SetRValue(TReal);
+                    Others => throw SemanticError(
+                        "Error de tipus de dades en divisio ",(dvRes.Tipus,dvRes2.Tipus));
+                };
+            )
+        }
+        @AssociarAtribut("Resultat=",Resultat);
+        @dvRes.AssociarAtributs();
+
+    // <Factor> ================================================================
+    Rule <factor(dvRes:DescriptorValor,Resultat:Bool)>::=
+        (
+        // ! -------------------------------------------------------------------
+        !
+        @if (!Resultat) throw SemanticError("No s'aprofita el resultat");
+        <factor(dvRes,true)>
+        @if (dvRes.Tipus!:=TBool) throw SemanticError("Error de tipus de dades a !",dvRes.Tipus);
+        @dvRes.SetRValue(TBool);
+        | 
+        // - -------------------------------------------------------------------
+        -
+        @if (!Resultat) throw SemanticError("No s'aprofita el resultat");
+        <factor(dvRes,true)>
+        @{
+            switch (dvRes.Tipus) {
+                TInt => {}
+                TReal => {}
+                Others => throw SemanticError(
+                    "Error de tipus de dades a cambi de signe ",dvRes.Tipus);
+            }
+            dvRes.SetRValue(dvRes.Tipus);
+        }
+        | 
+        // & -------------------------------------------------------------------
+        &
+        @if (!Resultat) throw SemanticError("No s'aprofita el resultat");
+        <factor(dvRes,true)>
+        @if (!dvRes.PermisEscriptura) throw SemanticError("El operando de & no es un LValue"); 
+        @dvRes.SetRValue(TApuntador(dvRes.Tipus));
+        |
+        // ( expressió ) ------------------------------------------------------
+        "(" <Expressio(dvRes,Resultat)> ")"
+        
+        |
+        // Numero -------------------------------------------------------------
+        @var v;
+        Numero#(v) 
+        @if (!Resultat) throw SemanticError("No s'aprofita el resultat");
+        @dvRes.SetRValue(if (typeP(int,v)) TInt else TReal);
+        |
+        // Caracter ------------------------------------------------------------
+        @var v;
+        Caracter#(v)
+        @if (!Resultat) throw SemanticError("No s'aprofita el resultat");
+        @dvRes.SetRValue(TChar);
+        |
+        // String --------------------------------------------------------------
+        @var v;
+        String#(v)
+        @{
+            if (!Resultat) throw SemanticError("No s'aprofita el resultat");
+            dvRes.SetRValue(TArray(v.Length,TChar));
+        }
+        |
+        // true ----------------------------------------------------------------
+        true
+        @if (!Resultat) throw SemanticError("No s'aprofita el resultat");
+        @dvRes.SetRValue(TBool);
+        |
+        // false ---------------------------------------------------------------
+        false
+        @if (!Resultat) throw SemanticError("No s'aprofita el resultat");
+        @dvRes.SetRValue(TBool);
+        |
+        // Null ----------------------------------------------------------------
+        Null
+        @if (!Resultat) throw SemanticError("No s'aprofita el resultat");
+        @dvRes.SetRValue(TApuntador(TVoid));
+        |
+        // new -----------------------------------------------------------------
+        "new" 
+        @Var dvParametres=[],t;
+        @if (!Resultat) throw SemanticError("No s'aprofita el resultat");
+        <tipus(t,unbound)>  [<parametres(dvParametres)>]
+        @{
+            t.ComprovarConstruible(dvParametres);
+            dvRes.SetRValue(TApuntador(t));
+        }
+        |        
+        // this/Identificador -------------------------------------------------------
+        <PosibleLValue(dvRes)> 
+        (
+            // Asignación ------------------------------------------------------
+            @if (!dvRes.PermisEscriptura) throw SemanticError("No es pot asignar");
+            @var dvExp=DescriptorValor();        
+            = <Expressio(dvExp,true)>
+            @{
+                Var tipusFont=dvExp.Tipus;
+                Var tipusDesti=dvRes.Tipus;
+                tipusDesti.ComprovarAssignable();
+                if (!TipusPertany(tipusFont,tipusDesti)) throw SemanticError("Error de tipus de dades en =",(tipusFont,tipusDesti));
+                dvRes.SetRValue(if (resultat) tipusFont else TVoid);
+            }
+        | 
+            $ // Lectura
+            @{
+                if (Resultat && dvRes.Tipus=:=TVoid) throw SemanticError("Falta un resultat");
+                if (!Resultat && dvRes.Tipus!:=TVoid) throw SemanticError("Sobra un resultat");
+            }
+        )
+        )
+        @AssociarAtribut("Resultat=",Resultat);
+        @dvRes.AssociarAtributs();
+        
+    // <PosibleLValue> =========================================================
+    // <PosibleLValue>::=::=(this|ID [<param>]) <Acces>
+    Rule <PosibleLValue(dvAcc:DescriptorValor)>::=
+    (
+        @var nom;     
+        (
+            this
+            @var ets=TS.BuscarMetodeActiu();
+            @dvAcc.SetRValue(TApuntador(ets.Classe));
+        |
+            Identificador#(nom) 
+            ( 
+                // Crida o construcción ----------------------------------------
+                @var etss=TS.Buscar(nom);
+                @var dvParametres;
+                <Parametres(dvParametres)>
+                @{
+                    if (TypeP(ETSTipus,etss.Head) && TypeP(TClasse,etss.Head.Tipus)) {
+                        // Construcción
+                        Var t=etss.Head.Tipus;                                    
+                        var etsCons=SeleccionarMetode(t.Constructors(),dvParametres);
+                        ComprovarPermisosParametres(dvParametres,etsCons.Parametres);
+                        dvAcc.SetRValue(t);
+                    }
+                    else if (TypeP(ETSFuncio,etss.Head)) {
+                        // Crida a funció/procediment/mètode
+                        var etsFun=SeleccionarMetode(etss,dvParametres);
+                        var t=etsFun.TipusRetorn;                                    
+                        ComprovarPermisosParametres(dvParametres,etsFun.Parametres);
+                        dvAcc.SetRValue(t);
+                    }
+                    else  throw SemanticError(nom," no es funció, procedimient ni classe");
+                }
+                |
+                
+                // Variable/paràmetre/Camp/Constant  ---------------------------
+                $
+                @{
+                    var etss=TS.Buscar(nom);
+                    var ets=etss.head;
+                    if (TypeP(ETSVariable,ets)) {
+                        dvAcc.SetLValue(ets.Tipus);
+                    }
+                    else throw SemanticError(nom," no es variable");
+                }
+            ) 
+        )
+        <Acces(dvAcc)>
+    )
+    @dvAcc.AssociarAtributs();
+        
+    // <Acces> =================================================================    
+    Rule <Acces(dvAcc:DescriptorValor)>::= 
+        {
+            <AccesIndex(dvAcc)>      |
+            <AccesCampMetode(dvAcc)> |
+            <AccesApuntador(dvAcc)>
+        }
+        @dvAcc.AssociarAtributs();
+        
+    // <AccesIndex> =============================================================
+    Rule <AccesIndex(dvAcc:DescriptorValor)>::= 
+        @if (!typeP(TArray,dvAcc.Tipus)) throw SemanticError("Tipus erroni en array");
+        @var dvIndex=DescriptorValor();
+        "[" <Expressio(dvIndex,true)>
+        @{
+            if (dvIndex.Tipus!:=TInt) throw SemanticError("Tipus erroni en index");
+            dvAcc.Tipus=dvAcc.Tipus.TipusElements;
+        }
+        "]"
+        @dvAcc.AssociarAtributs();
+
+    // <AccesCampMetode> =======================================================
+    Rule <AccesCampMetode(dvAcc:DescriptorValor)>::= 
+        @if (!typeP(TClasse,dvAcc.Tipus)) throw SemanticError("Tipus erroni en .camp ",typeof(dvAcc.Tipus));
+        @var nom;
+        . identificador#(nom) 
+        (
+            // .metode(...) ------------------------------------------------
+            @if (!dvAcc.PermisEscriptura ) throw SemanticError("El objecte sobre el que s'aplica el método no és LValue");
+            @var dvParametres;
+            <parametres(dvParametres)>
+            @{
+                var etss=dvAcc.Tipus.BuscarMetode(nom);
+                var ets=SeleccionarMetode(etss,dvParametres);
+                ComprovarPermisosParametres(dvParametres,ets.Parametres);
+                dvAcc.SetRValue(ets.TipusRetorn);
+            }
+            | 
+            // .camp -------------------------------------------------------
+            $
+            @{
+                var ets=dvAcc.Tipus.BuscarCamp(nom);
+                dvAcc.Tipus=ets.Tipus;                  
+            }
+        )
+        @dvAcc.AssociarAtributs();
+
+    // <AccesApuntador> =======================================================
+    Rule <AccesApuntador(dvAcc:DescriptorValor)>::= 
+        ^
+        @{
+            if (!TypeP(TApuntador,dvAcc.Tipus)) throw SemanticError("Tipus erroni en ^");
+            dvAcc.SetLValue(dvAcc.Tipus.TipusBase);
+        }
+        @dvAcc.AssociarAtributs();
+
+    // <Parametres> ============================================================
+    Rule <parametres(&dvParametres)>::=
+        @dvParametres=[];
+        "(" [
+            @var dv=DescriptorValor();
+            <Expressio(dv,true)>  
+            @dvParametres=dv::dvParametres;
+            { 
+                @dv=DescriptorValor();
+                , <Expressio(dv,true)> 
+                @dvParametres=dv::dvParametres;
+            } 
+            ] 
+        ")"
+        @dvParametres=reverse(dvParametres);
+    // =========================================================================
+    END;    
+    }
+    CATCH (ex) {
+        ParserErrorNLin=CSLGetScanLineNumber();
+        ParserErrorLine=system$CSLScanLine();
+        ParserErrorNCol=system$CSLGetScanCharNumber();
+        ParserErrorException=ex;
+        COut.PrintLn("Error a la linea ",ParserErrorNLin,
+                     " del fitxer ",FileName);
+        COut.PrintLn(ParserErrorLine);
+        for (i<-0 .. min(ParserErrorNCol-1,ParserErrorLine.Length-1))
+            COut.Print(if (ParserErrorLine[i]=:='\t') '\t'
+                       else ' ');
+        COut.PrintLN("^ ",if (TypeP(exception,ex)) ex.What else ex);
+        if (TypeP(exception,ex)) COut.PrintLN(FmtPretty,ex.BackTrace);
+        system$CSLSetParserLineNumber(OldNLin);
+        system$CSLSetScanLineNumber(Oldline);
+        if (!TypeP(Stream,ST)) Close(ScanInput);
+        ScanInput=OldScanInput;
+        return;
+    };
+    system$CSLSetParserLineNumber(OldNLin);
+    system$CSLSetScanLineNumber(Oldline);
+    if (!TypeP(Stream,ST)) Close(ScanInput);
+    ScanInput=OldScanInput;
+}

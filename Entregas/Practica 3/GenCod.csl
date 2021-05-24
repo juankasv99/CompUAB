@@ -47,7 +47,7 @@ SetOpcionesInformes(
 	//VerExtensions=> ["InstruccionBlock","InstruccionCase","InstruccionSelect","InstruccionRepeatUntil","InstruccionDoWhile"]
 	//VerExtensions=>["DeclaracionMultiplesVariablesMismoTipo"]
 	//VerExtensions=>["ArrayMultidimensional","DeclaracionMultiplesVariablesMismoTipo","OperadorBoolBits"]
-	VerExtensions=>["InstruccionBreak"]
+	VerExtensions=>["DeclaracionVariableAuto","InstruccionCase"]
 	//VerExtensions=>unbound
 ); 
 
@@ -1439,26 +1439,6 @@ Proc Compila(FileName:String,St=Unbound,VeureCodiGenerat=false,VeureCodiExecucio
 		
 		@cod.Put(DefEtiqueta(EtiFinal));
 		
-		
-		|
-		@{
-			Var EtssMain=TS.Buscar("main");
-            if (!-](EtsMain<-EtssMain,TypeP(ETSFuncio,EtsMain) && EtsMain.TipusRetorn=:=TVoid && EtsMain.Parametres==[])) 
-                throw SemanticError("Falta declarar el procediment Main o se ha declarado incorrectamente");
-		}
-		break ";"
-		for (ets<-ts.Pila) switch (ets) {
-			TSSeparadorFuncio => throw SemanticError("Bucle no trobat per sortir amb break");
-			TSSeparadorBreakable => {
-				cod.Put(IJmp,RefEtiqueta(ets.Sortida));
-				return;
-			}
-			ETSVariable => switch (ets.Posicio) {
-				int => cod.Destruccio((0,ets.Posicio),ets.Tipus);
-				RefParametre => {}
-			}
-			TSSeparador | ETSFuncio | ETSTipus | ETSBlock => {}
-		}
 		
 		|
         // Print ---------------------------------------------------------------

@@ -1,0 +1,392 @@
+================================================================================
+INFORME OBLIGATORIO DE CORRECCION DE LA PRACTICA ===============================
+================================================================================
+Alumno.....: (Juan Carlos,Soriano Valle,1493037,0000000@uab.cat)
+Nombre.....: Juan Carlos
+Apellidos..: Soriano Valle
+NIA........: 1493037
+e-mail.....: 0000000@uab.cat
+
+-------------------------------------------------------------------------
+
+Fichero........: c:\tfg\Compiladors2021\Practicas\Generacio de Codi\1493037\GenCod.csl
+NIA Entrega....: 1493037
+Fecha..........: 24/5/2021
+Hora...........: 22:38
+Ampliaciones...: 
+    ArrayMultidimensional DeclaracionMultiplesVariablesMismoTipo
+    DeclaracionVariableAuto InstruccionBreak InstruccionCase InstruccionForElse
+    OperadorBoolBits
+
+Ver test de las ampliaciones...: 
+    InstruccionBreak
+
+
+################################################################################
+###                  SINTACTICO OBLIGATORIO: TEST QUE FALLAN                 ###
+################################################################################
+
+################################################################################
+###                   SINTACTICO ADICIONAL: TEST QUE FALLAN                  ###
+################################################################################
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SINTACTICO SintacticoInstruccionBreakErrorSintactico4 OPCIONAL
+DESCRIPCION: Verifica que se detectan correctamente errores sintácticos en break
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    break;
+/*  2*/    procedure main()
+/*  3*/    {
+/*  4*/    }
+/*  5*/    
+/*  6*/    
+--------------------------------------------------------
+Analitzant SintacticoInstruccionBreakErrorSintactico4
+Error a la linea 1 del fitxer SintacticoInstruccionBreakErrorSintactico4
+		break
+		^ main no declarat
+Call stack:
+009DC609: Constructor BackTrace(n:#Int)
+009D83EF: Constructor Exception(Args...)
+009C8667: Constructor SemanticError(Args...)
+00A67F2B: Fun ts:TaulaSimbols.Buscar(nom:String)
+01203767: Proc PARSER_programa()
+01203FA2: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+00A92D15: Proc TestSintactico(Nombre:Whole,extensions:Whole,descripcion:Whole,Keywords:Whole,Obligatorio:Whole,fuente:Whole,LineaError1:Whole,LineaError2:Whole,SemanticError:Whole,SubTest:Whole)
+009C7369: Proc LoadFile(FileName:String)
+009C7369: Proc LoadFile(FileName:String)
+002C8A9E: Fun Start()
+
+TEST SintacticoInstruccionBreakErrorSintactico4 <<<FALLA>>> 1 (1,1)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+################################################################################
+###                  SEMANTICO OBLIGATORIO: TEST QUE FALLAN                  ###
+################################################################################
+
+################################################################################
+###                   SEMANTICO ADICIONAL: TEST QUE FALLAN                   ###
+################################################################################
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SEMANTICO SemanticoInstruccionBreakErrorSemantico1 OPCIONAL
+DESCRIPCION: Verifica que se detectan correctamente errores semanticos en break
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        break;
+/*  4*/    }
+/*  5*/    
+--------------------------------------------------------
+Analitzant SemanticoInstruccionBreakErrorSemantico1
+=====================================================================
+TEMPS D'EXECUCIO
+
+Execució sense errors
+=====================================================================
+TEST SemanticoInstruccionBreakErrorSemantico1 <<<FALLA>>> Unbound (3,3)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SEMANTICO SemanticoInstruccionBreakErrorSemantico2 OPCIONAL
+DESCRIPCION: Verifica que se detectan correctamente errores semanticos en break
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var i:Integer;
+/*  4*/        i=0;
+/*  5*/        while i<10 do {
+/*  6*/            procedure pru() 
+/*  7*/            {
+/*  8*/                break;
+/*  9*/            }
+/* 10*/            PrintLn "i=",i;
+/* 11*/            i=i+1;
+/* 12*/            
+/* 13*/        }
+/* 14*/    }
+/* 15*/    
+--------------------------------------------------------
+Analitzant SemanticoInstruccionBreakErrorSemantico2
+=====================================================================
+TEMPS D'EXECUCIO
+
+Execució sense errors
+=====================================================================
+TEST SemanticoInstruccionBreakErrorSemantico2 <<<FALLA>>> Unbound (8,8)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST SEMANTICO SemanticoInstruccionBreakTablaWhile1 OPCIONAL
+DESCRIPCION: Verifica que se crea el separador de bucle
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var i:Integer;
+/*  4*/        i=0;
+/*  5*/        while i<10 do {
+/*  6*/            IMPRIMIR_TAULA_DE_SIMBOLS;
+/*  7*/            PrintLn i;
+/*  8*/            i=i+1;
+/*  9*/        }
+/* 10*/    }
+/* 11*/    
+--------------------------------------------------------
+Analitzant SemanticoInstruccionBreakTablaWhile1
+
+=============================================================
+TAULA DE SIMBOLS ============================================
+=============================================================
+ETSFuncio: Nom=main, Classe=Void, TipusFuncio=TFProcediment, TeCos=True, Posicio=<Etiqueta main():0109BAA0>, DespRetorn=8, TipusRetorn=TVoid
+================ TSSeparadorFuncio Classe=Void, Funció=unbound, VarSz=Unbound
+================ TSSeparador ======================
+ETSVariable: Nom=i, Posició=-4, Lectura=True, Escriptura=True, Tipus=TInteger
+================ TSSeparador ======================
+=============================================================
+=============================================================
+
+=====================================================================
+TEMPS D'EXECUCIO
+
+Execució sense errors
+=====================================================================
+Error en la tabla de simbolos:
+Tabla de simbolos correcta: 
+    =============================================================
+    TAULA DE SIMBOLS SEMANTIC ===================================
+    =============================================================
+    ETSFuncio: Nom=main, Classe=Void, TipusFuncio=TFProcediment, TeCos=True, TipusRetorn=TVoid
+    ================ TSSeparadorFuncio Classe=Void, Funció=unbound
+    ================ TSSeparador ======================
+    ETSVariable: Nom=i, Lectura=True, Escriptura=True, Tipus=TInteger
+    ================== TSSeparadorBucle ========================
+    ================ TSSeparador ======================
+    =============================================================
+    =============================================================
+    
+Tabla de simbolos practica: 
+    =============================================================
+    TAULA DE SIMBOLS SEMANTIC ===================================
+    =============================================================
+    ETSFuncio: Nom=main, Classe=Void, TipusFuncio=TFProcediment, TeCos=True, TipusRetorn=TVoid
+    ================ TSSeparadorFuncio Classe=Void, Funció=unbound
+    ================ TSSeparador ======================
+    ETSVariable: Nom=i, Lectura=True, Escriptura=True, Tipus=TInteger
+    ================ TSSeparador ======================
+    =============================================================
+    =============================================================
+    
+    
+TEST SemanticoInstruccionBreakTablaWhile1 <<<FALLA>>> Unbound (Unbound,Unbound)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+################################################################################
+###             GENERACION DE CODIGO OBLIGATORIO: TEST QUE FALLAN            ###
+################################################################################
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST DE GENERACION DE CODIGO GenCodInstruccionBreakSimple1 OBLIGATORIO
+DESCRIPCION: Verifica el funcionamiento básico de la instruccion break
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var i:integer;
+/*  4*/        i=0; 
+/*  5*/        while i<10 do {
+/*  6*/            if i>5 then break;
+/*  7*/            PrintLn "i=",i;
+/*  8*/            i=i+1;                
+/*  9*/        }
+/* 10*/    }
+/* 11*/    
+--------------------------------------------------------
+Analitzant GenCodInstruccionBreakSimple1
+=====================================================================
+TEMPS D'EXECUCIO
+
+Execució sense errors
+=====================================================================
+Error en la salida del programa:
+Salida correcta: 
+    i=0
+    i=1
+    i=2
+    i=3
+    i=4
+    i=5
+    
+Salida practica: 
+    i=0
+    i=1
+    i=2
+    i=3
+    i=4
+    i=5
+    i=6
+    i=7
+    i=8
+    i=9
+    
+CODIGO GENERADO POR LA PRACTICA:
+--------------------------------
+=====================================================================
+0000                     ICall main() 
+0005                     IExit 
+0006 // PROCEDURE main() ---------------------------------------------------------------
+0006 main():             ILink 6                            // Reservar espai per variables locals
+0011                                                        -- Linea 4: Expressio a instruccio
+0011                     IPushLit 4 0 
+0020                     IPopBVar 4 -4 
+0029                                                        -- Linea 5: while <expressio>
+0029 L_RepetirWhile43:   IPushBVar 4 -4                     // PushValue (0,-4) de tipus Integer
+0038                     IPushLit 4 10 
+0047                     ILessInt 
+0048                     IJmpFalse L_FiWhile44 
+0053                                                        -- do <instruccio>
+0053                                                        -- Linea 6: If Condicio
+0053                     IPushBVar 4 -4                     // PushValue (0,-4) de tipus Integer
+0062                     IPushLit 4 5 
+0071                     IGreaterInt 
+0072                     IJmpFalse L_Else45 
+0077                                                        -- then <instruccio>
+0077 L_Else45:           
+0077                                                        -- Linea 7: PrintLn
+0077                                                        -- Imprimir valor
+0077                     IPushLit 2 "i=" 
+0084                     IPopBVar 2 -6 
+0093                     IPushBVar 2 -6                     // PushValue (0,-6) de tipus Array [2] of Character
+0102                     IPrintString 2 
+0107                     IPushBVar 4 -4                     // PushValue (0,-4) de tipus Integer
+0116                     IPrintInt 
+0117                     IPushLit 1 '\n' 
+0123                     IPrintChar 
+0124                                                        -- Linea 8: Expressio a instruccio
+0124                     IPushBVar 4 -4                     // PushValue (0,-4) de tipus Integer
+0133                     IPushLit 4 1 
+0142                     IAddInt 
+0143                     IPopBVar 4 -4 
+0152                     IJmp L_RepetirWhile43 
+0157 L_FiWhile44:        
+0157                                                        -- Linea 10: final while
+0157                     IUnlink                            // Treure variables locals de la pila
+0158                     IRet                               // Sortir de procediment
+=====================================================================
+TEST GenCodInstruccionBreakSimple1 <<<FALLA>>> Unbound
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+TEST DE GENERACION DE CODIGO GenCodInstruccionBreakSimple2 OBLIGATORIO
+DESCRIPCION: Verifica el funcionamiento básico de la instruccion break
+CODIGO FUENTE A COMPILAR:
+-------------------------
+/*  1*/    procedure main()
+/*  2*/    {
+/*  3*/        var i:integer;
+/*  4*/        i=0; 
+/*  5*/        printLn "Antes";
+/*  6*/        while i<10 do break;
+/*  7*/        printLn "Despues";
+/*  8*/    }
+/*  9*/    
+--------------------------------------------------------
+Analitzant GenCodInstruccionBreakSimple2
+=====================================================================
+TEMPS D'EXECUCIO
+Call stack:
+009DC609: Constructor BackTrace(n:#Int)
+009D83EF: Constructor Exception(Args...)
+011D7E7F: Proc Run(inici:Whole,debug:Whole,StopAt:Whole)
+012043A0: Proc Compila(FileName:String,st:Whole,VeureCodiGenerat:Whole,VeureCodiExecucio:Whole)
+00A94C64: Proc TestGenCod(Nombre:Whole,extensions:Whole,descripcion:Whole,Keywords:Whole,Obligatorio:Whole,fuente:Whole,output:Whole,Code:Whole)
+009C7369: Proc LoadFile(FileName:String)
+009C7369: Proc LoadFile(FileName:String)
+002C8A9E: Fun Start()
+00A08680: Proc cmpHelpCode()
+
+Error: Se ha sobrepasado el límite de instrucciones a ejecutar
+Error en la salida del programa:
+Salida correcta: 
+    Antes
+    Despues
+    
+Salida practica: 
+    Antes
+    
+CODIGO GENERADO POR LA PRACTICA:
+--------------------------------
+=====================================================================
+0000                     ICall main() 
+0005                     IExit 
+0006 // PROCEDURE main() ---------------------------------------------------------------
+0006 main():             ILink 16                           // Reservar espai per variables locals
+0011                                                        -- Linea 4: Expressio a instruccio
+0011                     IPushLit 4 0 
+0020                     IPopBVar 4 -4 
+0029                                                        -- Linea 5: PrintLn
+0029                                                        -- Imprimir valor
+0029                     IPushLit 5 "Antes" 
+0039                     IPopBVar 5 -9 
+0048                     IPushBVar 5 -9                     // PushValue (0,-9) de tipus Array [5] of Character
+0057                     IPrintString 5 
+0062                     IPushLit 1 '\n' 
+0068                     IPrintChar 
+0069                                                        -- Linea 6: while <expressio>
+0069 L_RepetirWhile50:   IPushBVar 4 -4                     // PushValue (0,-4) de tipus Integer
+0078                     IPushLit 4 10 
+0087                     ILessInt 
+0088                     IJmpFalse L_FiWhile51 
+0093                                                        -- do <instruccio>
+0093                     IJmp L_RepetirWhile50 
+0098 L_FiWhile51:        
+0098                                                        -- Linea 7: final while
+0098                                                        -- Linea 7: PrintLn
+0098                                                        -- Imprimir valor
+0098                     IPushLit 7 "Despues" 
+0110                     IPopBVar 7 -16 
+0119                     IPushBVar 7 -16                    // PushValue (0,-16) de tipus Array [7] of Character
+0128                     IPrintString 7 
+0133                     IPushLit 1 '\n' 
+0139                     IPrintChar 
+0140                     IUnlink                            // Treure variables locals de la pila
+0141                     IRet                               // Sortir de procediment
+=====================================================================
+TEST GenCodInstruccionBreakSimple2 <<<FALLA>>> Unbound
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+================================================================================
+RESUMEN OBLIGATORIO ============================================================
+================================================================================
+
+NOTAS NO VALIDAS POR RESTRINGIR LOS TEST A PROBAR
+
+Resultados sintactico ----------------------------------------------------------
+Test sintactico obligatorio OK............: 50 (100%) CORRECTO
+Test sintactico adicional OK..............: 3 (75%)
+NOTA SINTACTICO...........................: 8.75
+
+TEST ADICIONALES QUE FALLAN (1):
+    SintacticoInstruccionBreakErrorSintactico4
+
+Resultados semantico -----------------------------------------------------------
+Test semantico obligatorio OK.............: 58 (100%) CORRECTO
+Test semantico adicional OK...............: 0 (0%)
+NOTA SEMANTICO............................: 5
+
+TEST ADICIONALES QUE FALLAN (3):
+    SemanticoInstruccionBreakErrorSemantico1
+    SemanticoInstruccionBreakErrorSemantico2
+    SemanticoInstruccionBreakTablaWhile1
+
+Resultados generacion de codigo ------------------------------------------------
+Test generación de código obligatorio OK..: 50 (96.1538%) <<<FALLA>>>
+Test generación de código adicional OK....: 0 (100%)
+NOTA GENCOD...............................: 0
+TEST OBLIGATORIOS QUE FALLAN (2):
+    GenCodInstruccionBreakSimple1 GenCodInstruccionBreakSimple2
+
+

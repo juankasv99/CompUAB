@@ -1244,6 +1244,9 @@ Proc [public] ts:TaulaSimbols.Imprimir(out:Stream=cout)=>
 			}
             TSSeparador=>
                 out.PrintLn("================ TSSeparador ======================");
+            TSSeparadorBreakable=> {
+                out.PrintLn("================== TSSeparadorBreakable Entrada=",ets.Entrada," Sortida= ",ets.Sortida);
+            }
             Others=> out.PrintLn("Entrada o separador de la TS erroni: ", ets);
         }
 

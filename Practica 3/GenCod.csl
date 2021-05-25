@@ -66,6 +66,18 @@ Proc cod:CodiEnGeneracio.Assignacio(codDesti:CodiEnGeneracio,resultat:bool=false
 // FUNCIONS D'AJUDA PER LA GENERACIÓ DE CODI ===================================
 // =============================================================================
 
+// Nou Ambit Breakable ---------------------------------------------------------
+//Proc cod:CodiEnGeneracio.NouAmbitBreakable(Entrada,Sortida)=> {
+//    ts.Pila=TSSeparadorBreakable(Entrada,Sortida)::ts.Pila;
+//}
+
+    Type [public,Print=Contents] TSSeparadorBreakable (
+    Entrada, // Etiqueta per anar a la següent iteració d'un bucle
+    Sortida // Etiqueta a la sortida del bucle/switch
+    ) from TSSeparador;
+
+
+
 // PushAdreca ==================================================================
 // Posa l'adreça del resultat d'un codi a la pila
 // S'utilitza pel pas de paràmetres per referencia i per possar l'apuntador this
@@ -745,6 +757,7 @@ Proc Compila(FileName:String,St=Unbound,VeureCodiGenerat=false,VeureCodiExecucio
             | <DecClasse>
             | IMPRIMIR_TAULA_DE_SIMBOLS ";" @ts.Imprimir(); @ts.ImprimirSemantic(SortidaSemantic);
         }
+        @VerifyEOFReached();
         @{
             Var EtssMain=TS.Buscar("main");
             if (EtssMain.Length==0) throw SemanticError("Falta declarar el procediment Main");
@@ -1318,10 +1331,13 @@ Proc Compila(FileName:String,St=Unbound,VeureCodiGenerat=false,VeureCodiExecucio
         )
         |
         // while ---------------------------------------------------------------
+        //@ts.Pila=TSSeparadorBucle(Entrada, Sortida)::ts.Pila;
         while
             @var EtiWhile=Etiqueta("L_RepetirWhile%");
             @var EtiEndWhile=Etiqueta("L_FiWhile%");
             @cod.Put(ComentariLinea("Linea ",CSLGetScanLineNumber(),": ","while <expressio>"));
+            //@cod.NouAmbitBreakable(EtiWhile,EtiEndWhile);
+            @ts.Pila=TSSeparadorBreakable(EtiWhile,EtiEndWhile)::ts.Pila;
             @Cod.Put(DefEtiqueta(EtiWhile));
             <Expressio(cod,true)>
             @if (cod.Tipus!=TBool) throw SemanticError("Error de tipus en while");
@@ -1331,7 +1347,10 @@ Proc Compila(FileName:String,St=Unbound,VeureCodiGenerat=false,VeureCodiExecucio
         do <instruccio(cod)>
             @cod.put(IJmp,RefEtiqueta(EtiWhile));
             @Cod.Put(DefEtiqueta(EtiEndWhile));
+            @cod.DestruccioAmbit();
             @cod.Put(ComentariLinea("Linea ",CSLGetScanLineNumber(),": ","final while"));
+        //ts.EliminarAmbit();
+            
         |
 		// case CREADO POR MI --------------------------------------------------
 		/*@var dvRes=DescriptorValor();
@@ -1441,24 +1460,32 @@ Proc Compila(FileName:String,St=Unbound,VeureCodiGenerat=false,VeureCodiExecucio
 		
 		
 		|
-		@{
-			Var EtssMain=TS.Buscar("main");
+        // BREAK --------------------------------------------------------------------------------------
+        @{
+            Var EtssMain=TS.Buscar("main");
             if (!-](EtsMain<-EtssMain,TypeP(ETSFuncio,EtsMain) && EtsMain.TipusRetorn=:=TVoid && EtsMain.Parametres==[])) 
                 throw SemanticError("Falta declarar el procediment Main o se ha declarado incorrectamente");
-		}
-		break ";"
-		for (ets<-ts.Pila) switch (ets) {
-			TSSeparadorFuncio => throw SemanticError("Bucle no trobat per sortir amb break");
-			TSSeparadorBreakable => {
-				cod.Put(IJmp,RefEtiqueta(ets.Sortida));
-				return;
-			}
-			ETSVariable => switch (ets.Posicio) {
-				int => cod.Destruccio((0,ets.Posicio),ets.Tipus);
-				RefParametre => {}
-			}
-			TSSeparador | ETSFuncio | ETSTipus | ETSBlock => {}
-		}
+        }
+        break ";"
+        //@cod.SortirBreakable();
+        @{
+            var enBucle = false;
+            for (ets<-ts.Pila) switch (ets) {
+                TSSeparadorFuncio=> throw SemanticError("Bucle no trobat per sortir amb break");
+                TSSeparadorBreakable=> {
+                    enBucle = true;
+                    cod.Put(IJmp,RefEtiqueta(ets.Sortida));
+                    return;
+                }
+                ETSVariable=> switch (ets.Posicio) {
+                    int=> cod.Destruccio((0,ets.posicio),ets.Tipus);
+                    RefParametre=> {}
+                }
+                TSSeparador|ETSTipus|ETSFuncio|ETSBlock => {}
+                
+            }
+            if(!enBucle) throw SemanticError("Error per break fora de bucle");
+        }
 		
 		|
         // Print ---------------------------------------------------------------

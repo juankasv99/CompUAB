@@ -38,7 +38,6 @@ procedure main()
 		if i>5 then break;
 		PrintLn "i=",i;
 		i=i+1;
-		IMPRIMIR_TAULA_DE_SIMBOLS;
 	}
 
 	
